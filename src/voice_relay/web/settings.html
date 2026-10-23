@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="en" class="wa-cloak">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>voice-relay settings</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%234f46e5%27 stroke-width=%272.4%27 stroke-linecap=%27round%27%3E%3Cpath d=%27M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@awesome.me/webawesome@3.14.0/dist-cdn/styles/webawesome.css">
+<script type="module" src="https://cdn.jsdelivr.net/npm/@awesome.me/webawesome@3.14.0/dist-cdn/webawesome.loader.js"></script>
+<script>
+  const dark = matchMedia("(prefers-color-scheme: dark)");
+  const scheme = () => document.documentElement.classList.toggle("wa-dark", dark.matches);
+  scheme(); dark.addEventListener("change", scheme);
+</script>
+<style>
+:root {
+  --wa-color-brand-fill-loud: #4f46e5; --wa-color-brand-border-loud: #4f46e5; --wa-color-brand-on-loud: #fff;
+  --wa-color-brand-fill-quiet: #eef0ff; --wa-color-brand-on-quiet: #3730a3; --wa-form-control-activated-color: #4f46e5;
+  --wa-color-focus: #6d64f0;
+}
+.wa-dark {
+  --wa-color-brand-fill-loud: #8b87ff; --wa-color-brand-border-loud: #8b87ff; --wa-color-brand-on-loud: #0d0f12;
+  --wa-color-brand-fill-quiet: #23224a; --wa-color-brand-on-quiet: #c7c5ff; --wa-form-control-activated-color: #8b87ff;
+  --wa-color-focus: #8b87ff;
+}
+body { margin: 0; background: var(--wa-color-surface-lowered); padding-bottom: 104px; }
+.top {
+  position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: var(--wa-space-s);
+  padding: var(--wa-space-s) var(--wa-space-xl); border-bottom: 1px solid var(--wa-color-surface-border);
+  background: color-mix(in srgb, var(--wa-color-surface-lowered) 85%, transparent); backdrop-filter: blur(10px);
+}
+.brand { display: flex; align-items: center; gap: var(--wa-space-xs); font-weight: var(--wa-font-weight-semibold); white-space: nowrap; }
+.brand svg { color: var(--wa-color-brand-fill-loud); }
+.brand small { color: var(--wa-color-text-quiet); font-weight: normal; margin-left: var(--wa-space-2xs); }
+.spacer { flex: 1; }
+main { max-width: 780px; margin: 0 auto; padding: var(--wa-space-2xl) var(--wa-space-l); display: grid; gap: var(--wa-space-l); }
+h1 { margin: 0 0 var(--wa-space-2xs); font-size: var(--wa-font-size-2xl); }
+.lead { margin: 0; color: var(--wa-color-text-quiet); }
+section {
+  background: var(--wa-color-surface-default); border: 1px solid var(--wa-color-surface-border);
+  border-radius: var(--wa-border-radius-l); padding: var(--wa-space-l) var(--wa-space-xl) var(--wa-space-xl);
+  display: grid; gap: var(--wa-space-l);
+}
+section h2 { margin: 0; font-size: var(--wa-font-size-l); }
+section header p { margin: var(--wa-space-3xs) 0 0; color: var(--wa-color-text-quiet); font-size: var(--wa-font-size-s); }
+.grid2 { display: grid; gap: var(--wa-space-l); grid-template-columns: 1fr 1fr; }
+.hidden { display: none !important; }
+.stack { display: grid; gap: var(--wa-space-s); }
+/* the section already pads its sides: an accordion inside lines up with the other fields */
+wa-details::part(header), wa-details::part(content) { padding-inline: 0; }
+wa-details::part(content) { display: grid; gap: var(--wa-space-l); }
+.option-row { display: grid; gap: 1px; }
+.option-row small { color: inherit; opacity: .7; font-size: var(--wa-font-size-xs); }
+.head { display: flex; gap: var(--wa-space-m); justify-content: space-between; align-items: flex-start; }
+.verdict { font-size: var(--wa-font-size-s); margin-top: calc(var(--wa-space-s) * -1); display: flex; gap: var(--wa-space-xs); }
+.verdict:empty { display: none; }
+.verdict.ok { color: var(--wa-color-success-on-quiet); }
+.verdict.bad { color: var(--wa-color-danger-on-quiet); }
+.verdict.busy { color: var(--wa-color-text-quiet); }
+.facts { display: flex; gap: var(--wa-space-2xs); flex-wrap: wrap; align-items: center; margin-top: calc(var(--wa-space-xs) * -1); }
+.facts span.text { color: var(--wa-color-text-quiet); font-size: var(--wa-font-size-s); }
+.code::part(input), .code::part(textarea) { font-family: var(--wa-font-family-code); font-size: var(--wa-font-size-s); }
+.voices { border: 1px solid var(--wa-color-surface-border); border-radius: var(--wa-border-radius-m); max-height: 320px; overflow: auto; }
+.voice {
+  display: flex; align-items: center; gap: var(--wa-space-s); padding: var(--wa-space-xs) var(--wa-space-s);
+  border-bottom: 1px solid var(--wa-color-surface-border); cursor: pointer;
+}
+.voice:last-child { border-bottom: 0; }
+.voice:hover { background: var(--wa-color-neutral-fill-quiet); }
+.voice[aria-checked=true] { background: var(--wa-color-brand-fill-quiet); }
+.voice:focus-visible { outline: var(--wa-focus-ring); outline-offset: -2px; }
+.voice .meta { flex: 1; min-width: 0; }
+.voice .name { font-weight: var(--wa-font-weight-semibold); font-size: var(--wa-font-size-s); }
+.voice .detail { color: var(--wa-color-text-quiet); font-size: var(--wa-font-size-xs); }
+.voice .tick { color: var(--wa-color-brand-fill-loud); visibility: hidden; }
+.voice[aria-checked=true] .tick { visibility: visible; }
+.empty { padding: var(--wa-space-m); color: var(--wa-color-text-quiet); font-size: var(--wa-font-size-s); text-align: center; }
+.keys { display: grid; }
+.local .key { grid-template-columns: minmax(220px, auto) 1fr auto auto; }
+.key { display: grid; grid-template-columns: 160px 1fr auto auto; gap: var(--wa-space-s); align-items: center; padding: var(--wa-space-s) 0; border-bottom: 1px solid var(--wa-color-surface-border); }
+.key:last-child { border-bottom: 0; }
+.key .title { display: grid; gap: 2px; font-weight: var(--wa-font-weight-semibold); }
+.key .title a { font-size: var(--wa-font-size-xs); font-weight: normal; }
+.key > wa-badge { min-width: 88px; justify-content: center; }
+.models { display: grid; max-height: 55vh; overflow: auto; margin-top: var(--wa-space-s); border: 1px solid var(--wa-color-surface-border); border-radius: var(--wa-border-radius-m); }
+.model { display: grid; grid-template-columns: 1fr auto; gap: 2px var(--wa-space-m); padding: var(--wa-space-s); line-height: 1.35; border: 0; border-bottom: 1px solid var(--wa-color-surface-border); cursor: pointer; text-align: left; background: none; color: inherit; font: inherit; }
+.model:hover, .model:focus-visible { background: var(--wa-color-neutral-fill-quiet); outline: none; }
+.model .id { grid-column: 1; color: var(--wa-color-text-quiet); font-size: var(--wa-font-size-xs); font-family: var(--wa-font-family-code); }
+.model .price { grid-column: 2; grid-row: 1 / span 2; align-self: center; color: var(--wa-color-text-quiet); font-size: var(--wa-font-size-xs); font-variant-numeric: tabular-nums; }
+.savebar {
+  position: fixed; left: 50%; bottom: var(--wa-space-l); transform: translate(-50%, 150%); z-index: 10; width: min(560px, calc(100% - 32px));
+  display: flex; align-items: center; gap: var(--wa-space-s); padding: var(--wa-space-xs) var(--wa-space-xs) var(--wa-space-xs) var(--wa-space-l);
+  border-radius: var(--wa-border-radius-l); background: var(--wa-color-neutral-fill-loud); color: var(--wa-color-neutral-on-loud);
+  box-shadow: var(--wa-shadow-l); transition: transform var(--wa-transition-normal) var(--wa-transition-easing);
+}
+.savebar.show { transform: translate(-50%, 0); }
+.savebar .msg { flex: 1; font-size: var(--wa-font-size-s); }
+#discard::part(base) { color: var(--wa-color-neutral-on-loud); }
+.savebar .msg small { display: block; opacity: .7; font-size: var(--wa-font-size-xs); }
+.info { display: inline-block; vertical-align: text-bottom; width: 18px; height: 18px; padding: 0; border-radius: 50%; border: 1px solid var(--wa-color-text-quiet); background: none; color: var(--wa-color-text-quiet); font: italic 600 11px/1 Georgia, serif; cursor: help; }
+.info:hover, .info:focus-visible { color: var(--wa-color-text-normal); border-color: var(--wa-color-text-normal); }
+.facts a.text { font-size: var(--wa-font-size-s); }
+.error::part(hint) { color: var(--wa-color-danger-on-quiet); }
+@media (max-width: 640px) {
+  .grid2 { grid-template-columns: 1fr; } .top { padding: var(--wa-space-s) var(--wa-space-m); } .brand small { display: none; }
+  main { padding: var(--wa-space-xl) var(--wa-space-m); } section { padding: var(--wa-space-l); }
+  .key, .local .key { grid-template-columns: 1fr auto; } .key .title { grid-column: 1 / -1; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"/></svg>
+    voice-relay <small>Settings</small>
+  </div>
+  <div class="spacer"></div>
+  <wa-badge id="status" variant="neutral" appearance="filled" pill>Loading</wa-badge>
+  <wa-button size="s" appearance="outlined" href="/voice" target="_blank">Voice page ↗</wa-button>
+</header>
+
+<main>
+  <div>
+    <h1>Settings</h1>
+    <p class="lead">Pick the services the voice agent uses. Changes apply the next time the voice window connects; reload it to apply them now.</p>
+  </div>
+
+  <wa-callout id="problems" variant="warning" class="hidden"></wa-callout>
+
+  <section id="stt-card" aria-labelledby="stt-title">
+    <header class="head"><div><h2 id="stt-title">Speech recognition</h2><p>Turns your speech into text.</p></div><wa-button size="s" appearance="outlined" data-test="stt">Test</wa-button></header>
+    <div class="verdict" id="verdict-stt"></div>
+    <wa-radio-group id="stt-where" label="Runs on" orientation="horizontal" size="s"><wa-radio appearance="button" value="api">API</wa-radio><wa-radio appearance="button" value="local">This computer</wa-radio><wa-radio appearance="button" value="server">Your server</wa-radio></wa-radio-group>
+    <wa-select id="VOICE_RELAY_STT" label="Provider"></wa-select>
+    <div class="facts" id="stt-facts"></div>
+    <div class="grid2 hidden" id="stt-server">
+      <wa-input id="VOICE_RELAY_STT_URL" label="Server URL" placeholder="http://gpu-box:8000/v1" inputmode="url" autocomplete="off" class="code"></wa-input>
+      <wa-input id="VOICE_RELAY_STT_KEY" type="password" password-toggle label="Server key" placeholder="Only if the server needs one" autocomplete="off"></wa-input>
+    </div>
+    <div class="grid2">
+      <wa-select id="VOICE_RELAY_STT_LANGUAGE" label="Language" hint="Auto-detection needs a provider that supports it."></wa-select>
+      <wa-input id="VOICE_RELAY_STT_MODEL" label="Model" placeholder="Provider default" class="code" autocomplete="off" spellcheck="false"></wa-input>
+      <wa-select id="whisper-size" label="Model size" class="hidden"></wa-select>
+    </div>
+  </section>
+
+  <section id="llm-card" aria-labelledby="llm-title">
+    <header class="head"><div><h2 id="llm-title">Agent model</h2><p>Runs the conversation. Claude Code still does the coding work. Pick a fast model with reliable tool calls.</p></div><wa-button size="s" appearance="outlined" data-test="llm">Test</wa-button></header>
+    <div class="verdict" id="verdict-llm"></div>
+    <wa-radio-group id="llm-where" label="Runs on" orientation="horizontal" size="s"><wa-radio appearance="button" value="api">API</wa-radio><wa-radio appearance="button" value="local">This computer</wa-radio><wa-radio appearance="button" value="server">Your server</wa-radio></wa-radio-group>
+    <wa-select id="VOICE_RELAY_LLM" label="Provider"></wa-select>
+    <div class="facts" id="llm-facts"></div>
+    <wa-input id="VOICE_RELAY_LLM_MODEL" label="Model" placeholder="Provider default" class="code" autocomplete="off" spellcheck="false">
+      <wa-button slot="end" id="browse" size="s" appearance="plain" variant="brand">Browse</wa-button>
+    </wa-input>
+    <div class="facts" id="llm-found"></div>
+    <div class="grid2" id="llm-server">
+      <wa-input id="VOICE_RELAY_LLM_URL" label="Server URL" placeholder="http://localhost:8080/v1" inputmode="url" autocomplete="off" class="code"></wa-input>
+      <wa-input id="VOICE_RELAY_LLM_KEY" type="password" password-toggle label="Server key" placeholder="Only if the server needs one" autocomplete="off"></wa-input>
+    </div>
+    <wa-details summary="Advanced" appearance="plain">
+      <wa-textarea id="VOICE_RELAY_LLM_BODY" label="Extra request fields" rows="3" class="code" resize="vertical"
+        placeholder='{"chat_template_kwargs": {"enable_thinking": false}}' hint="A JSON object merged into each model request." spellcheck="false"></wa-textarea>
+    </wa-details>
+  </section>
+
+  <section id="tts-card" aria-labelledby="tts-title">
+    <header class="head"><div><h2 id="tts-title">Voice</h2><p>How the agent sounds.</p></div><wa-button size="s" appearance="outlined" data-test="tts">Test</wa-button></header>
+    <div class="verdict" id="verdict-tts"></div>
+    <wa-radio-group id="tts-where" label="Runs on" orientation="horizontal" size="s"><wa-radio appearance="button" value="api">API</wa-radio><wa-radio appearance="button" value="local">This computer</wa-radio><wa-radio appearance="button" value="server">Your server</wa-radio></wa-radio-group>
+    <wa-select id="VOICE_RELAY_TTS" label="Provider"></wa-select>
+    <div class="facts" id="tts-facts"></div>
+    <div class="grid2 hidden" id="tts-server">
+      <wa-input id="VOICE_RELAY_TTS_URL" label="Server URL" placeholder="http://gpu-box:8880/v1" inputmode="url" autocomplete="off" class="code"></wa-input>
+      <wa-input id="VOICE_RELAY_TTS_KEY" type="password" password-toggle label="Server key" placeholder="Only if the server needs one" autocomplete="off"></wa-input>
+    </div>
+    <wa-input id="voice-search" type="search" label="Voice" placeholder="Search voices" with-clear autocomplete="off">
+      <svg slot="start" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    </wa-input>
+    <div class="voices" id="voices" role="radiogroup" aria-label="Voices"></div>
+    <wa-input id="VOICE_RELAY_TTS_VOICE" label="Voice ID" placeholder="Picked from the list, or paste one" class="code" autocomplete="off" spellcheck="false"></wa-input>
+    <wa-slider id="VOICE_RELAY_TTS_SPEED" label="Speed" min="0.7" max="1.2" step="0.05" value="1" with-tooltip with-markers></wa-slider>
+    <wa-details summary="Advanced" appearance="plain">
+      <wa-input id="VOICE_RELAY_TTS_MODEL" label="Model" placeholder="Provider default" class="code"></wa-input>
+    </wa-details>
+  </section>
+
+  <section aria-labelledby="behaviour-title">
+    <header><h2 id="behaviour-title">Behaviour</h2><p>How the agent talks and works. Rules and prompt are Markdown files in <code>~/.config/voice-relay/</code>.</p></header>
+    <wa-textarea id="rules" label="Your rules" rows="3" resize="auto" hint="Added to the end of the prompt. File: rules.md."
+      placeholder="For example: Keep answers to one sentence. Call me Alex. Never send a push without asking twice."></wa-textarea>
+    <wa-input id="VOICE_RELAY_PROJECTS" label="Projects folder" placeholder="~/code" class="code" autocomplete="off" spellcheck="false"
+      hint="The agent can open a new Claude Code session in a folder inside it. Empty: the folders next to the linked sessions."></wa-input>
+    <wa-details appearance="plain">
+      <span slot="summary">Full prompt <wa-badge id="prompt-badge" variant="neutral" appearance="filled" pill>Built-in</wa-badge></span>
+      <div class="stack">
+        <wa-callout id="prompt-outdated" variant="warning" class="hidden">An update changed the built-in prompt after you made your copy. Compare them, or reset to the new built-in prompt.</wa-callout>
+        <wa-textarea id="prompt" class="code" rows="16" resize="vertical" spellcheck="false" aria-label="Full prompt"
+          hint="Edit it to make your own copy, file prompt.md. The built-in prompt is tuned for Claude Haiku; adjust it when you pick another model."></wa-textarea>
+        <div><wa-button id="prompt-reset" size="s" appearance="outlined">Reset to built-in</wa-button></div>
+      </div>
+    </wa-details>
+    <wa-details summary="Advanced" appearance="plain">
+      <wa-input id="VOICE_RELAY_NARRATION_SECONDS" type="number" label="Progress updates, seconds" placeholder="30" min="10" max="300" step="5" without-spin-buttons
+        hint="While Claude Code works, the agent says what it does no more often than this." style="max-width: 320px"></wa-input>
+    </wa-details>
+  </section>
+
+  <section id="local-card" aria-labelledby="local-title">
+    <header><h2 id="local-title">On this computer</h2><p>Speech engines that run here, with no key and nothing sent out. Each installs when you pick it; remove its models here.</p></header>
+    <wa-callout id="machine" variant="warning" class="hidden"></wa-callout>
+    <div class="keys local" id="local-models"></div>
+  </section>
+
+  <section id="keys-card" aria-labelledby="keys-title">
+    <header><h2 id="keys-title">API keys</h2><p>Stored in <code>~/.config/voice-relay/.env</code> on this computer, readable only by you. Saved keys are never shown.</p></header>
+    <div class="keys" id="keys"></div>
+  </section>
+</main>
+
+<div class="savebar" id="savebar" role="region" aria-label="Unsaved changes">
+  <div class="msg"><span id="savebar-text">Unsaved changes</span><small>Applies when the voice window connects</small></div>
+  <wa-button id="discard" appearance="plain" variant="neutral" style="color: inherit">Discard</wa-button>
+  <wa-button id="save" variant="brand">Save</wa-button>
+</div>
+
+<wa-dialog id="models-dialog" label="Choose a model" light-dismiss style="--width: 640px">
+  <wa-input id="model-search" type="search" placeholder="Search by name or id" with-clear autocomplete="off" autofocus></wa-input>
+  <div class="models" id="models" role="listbox" aria-label="Models"></div>
+  <p class="lead" style="font-size: var(--wa-font-size-xs); margin-top: var(--wa-space-xs)">OpenRouter models with tool calling. Price per million input / output tokens.</p>
+</wa-dialog>
+
+<wa-dialog id="install-dialog" label="Install on this computer?">
+  <div class="stack">
+    <div id="install-text"></div>
+    <wa-callout id="install-warning" variant="warning" class="hidden"></wa-callout>
+  </div>
+  <wa-button slot="footer" id="install-cancel" appearance="plain" variant="neutral">Cancel</wa-button>
+  <wa-button slot="footer" id="install-ok" variant="brand">Install</wa-button>
+</wa-dialog>
+
+<wa-toast id="toast" placement="top-center"></wa-toast>
+
+<script type="module">
+const TOKEN = "{{TOKEN}}";
+const WHERE = { api: ["API", "neutral"], local: ["Local", "success"], server: ["Your server", "brand"] };
+const SERVER_KEYS = ["VOICE_RELAY_STT_KEY", "VOICE_RELAY_LLM_KEY", "VOICE_RELAY_TTS_KEY"];
+const STT_MODELS = {
+  deepgram: ["nova-3-general", "nova-3", "nova-2"], elevenlabs: ["scribe_v2_realtime"],
+  assemblyai: ["universal-3-6-pro"], openai: ["gpt-transcribe"], cartesia: ["ink-whisper"],
+  whisper: ["tiny", "base", "small", "medium", "large-v3-turbo", "large-v3"],
+};
+const LANGUAGE_NAMES = new Intl.DisplayNames(["en"], { type: "language" });
+const languageName = code => code === "multi" ? "Multilingual, switching mid-sentence" : LANGUAGE_NAMES.of(code) || code;
+const languageCache = {};
+const KINDS = { stt: "VOICE_RELAY_STT", llm: "VOICE_RELAY_LLM", tts: "VOICE_RELAY_TTS" };
+const DEFAULT = "__default__"; // wa-select needs a non-empty value for "Provider default"
+const PLAY = '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor"/></svg>';
+const STOP = '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 2h8v8H2z" fill="currentColor"/></svg>';
+
+let state, saved = {}, draft = {}, removals = new Set(), models = [], voiceCache = {}, audio = null, playing = null;
+const $ = id => document.getElementById(id);
+
+function el(tag, props = {}, ...children) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === "class") node.className = v; else if (k === "text") node.textContent = v; else if (k === "html") node.innerHTML = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v); else if (v !== false && v != null) node.setAttribute(k, v === true ? "" : v);
+  }
+  node.append(...children.filter(Boolean));
+  return node;
+}
+
+async function api(path, options = {}) {
+  const reply = await fetch(path, { ...options, headers: { "x-voice-relay": TOKEN, "content-type": "application/json" } });
+  const data = await reply.json().catch(() => ({}));
+  if (!reply.ok) throw new Error(data.detail || `The server answered ${reply.status}`);
+  return data;
+}
+
+const provider = kind => draft[KINDS[kind]] || state.providers[kind][0];
+const locked = name => state.locked.includes(name);
+const keyReady = name => (state.keys[name] && !removals.has(name)) || (draft[name] || "").trim() !== "";
+
+function set(name, value) { draft[name] = value; updateBar(); }
+
+function changes() {
+  const out = {};
+  for (const name of state.fieldNames) if ((draft[name] ?? "") !== (saved[name] ?? "")) out[name] = draft[name] ?? "";
+  for (const name of Object.keys(state.keys)) {
+    if ((draft[name] || "").trim()) out[name] = draft[name].trim();
+    else if (removals.has(name)) out[name] = "";
+  }
+  return out;
+}
+
+function updateBar() {
+  const count = Object.keys(changes()).length;
+  $("savebar").classList.toggle("show", count > 0);
+  $("savebar-text").textContent = count === 1 ? "1 unsaved change" : `${count} unsaved changes`;
+}
+
+function option(value, label, detail, where) {
+  const [side, variant] = WHERE[where] || [];
+  return el("wa-option", { value, label },
+    detail ? el("span", { class: "option-row" }, el("span", { text: label }), el("small", { text: detail })) : label,
+    side ? el("wa-badge", { slot: "end", variant, appearance: "filled", pill: true, text: side }) : null);
+}
+
+function fillSelect(select, options, value) {
+  select.replaceChildren(...options);
+  select.value = value;
+}
+
+function renderProviders() {
+  for (const kind of Object.keys(KINDS)) {
+    const select = $(KINDS[kind]), id = provider(kind), { where, hint } = state.catalog[kind][id], [side, variant] = WHERE[where];
+    const same = state.providers[kind].filter(other => state.catalog[kind][other].where === where);
+    $(`${kind}-where`).value = where;
+    $(`${kind}-where`).disabled = locked(KINDS[kind]);
+    fillSelect(select, same.map(other => {
+      const { name, hint } = state.catalog[kind][other];
+      return option(other, name, hint, where);
+    }), id);
+    select.classList.toggle("hidden", same.length < 2);  // this computer and your server: one each
+    select.disabled = locked(KINDS[kind]);
+    const keyName = state.key_names[id], { about, guide, name } = state.catalog[kind][id], engine = state.local[id];
+    const detail = about || (engine && `${name} installs by itself after you save, once you agree to the download size. It then runs on this computer, with no key and nothing sent out.`);
+    $(`${kind}-facts`).replaceChildren(...[
+      el("wa-badge", { variant, appearance: "filled", pill: true, text: side }),
+      keyName && el("wa-badge", { variant: keyReady(keyName) ? "success" : "warning", appearance: "filled", pill: true,
+        text: keyReady(keyName) ? "Key saved" : "Needs a key" }),
+      engine && engineBadge(kind, id),
+      el("span", { class: "text" }, `${hint} `,
+        detail && el("button", { type: "button", class: "info", id: `about-${kind}`, "aria-label": `About ${name}`, text: "i" })),
+      detail && el("wa-tooltip", { for: `about-${kind}`, text: detail }),
+      guide && el("a", { class: "text", href: guide, target: "_blank", rel: "noopener", text: "Setup guide ↗" })].filter(Boolean));
+  }
+}
+
+function renderFields() {
+  const known = STT_MODELS[provider("stt")];
+  $("VOICE_RELAY_STT_MODEL").hint = provider("stt") === "compatible" ? "The model name the server serves."
+    : provider("stt") === "whisper" ? `Size: ${known.join(", ")}. Empty: small.` : known ? `For example: ${known.join(", ")}.` : "";
+  for (const name of state.fieldNames) {
+    const node = $(name);
+    if (!node || node.tagName === "WA-SELECT" || node.tagName === "WA-SLIDER") continue;
+    if (document.activeElement !== node) node.value = draft[name] ?? "";
+  }
+  for (const name of [...state.fieldNames, ...SERVER_KEYS]) if ($(name)) $(name).disabled = locked(name);
+  for (const name of SERVER_KEYS) {
+    if (document.activeElement !== $(name)) $(name).value = draft[name] || "";
+    $(name).placeholder = state.keys[name] ? "Saved; paste to replace" : "Only if the server needs one";
+  }
+  if (document.activeElement !== $("prompt")) $("prompt").value = draft.prompt || state.builtin_prompt;
+  renderPromptState();
+  const whisper = provider("stt") === "whisper", size = $("whisper-size");
+  $("VOICE_RELAY_STT_MODEL").classList.toggle("hidden", whisper);
+  size.classList.toggle("hidden", !whisper);
+  if (whisper) fillSelect(size, Object.entries(state.whisper_models).map(([name, mb]) => option(name, `${name} · ${mb} MB`)), draft.VOICE_RELAY_STT_MODEL || "small");
+  $("VOICE_RELAY_TTS_SPEED").classList.toggle("hidden", ["piper", "pocket"].includes(provider("tts")));  // they take no speed
+  $("VOICE_RELAY_TTS_SPEED").value = parseFloat(draft.VOICE_RELAY_TTS_SPEED || "1");
+  $("VOICE_RELAY_TTS_SPEED").label = `Speed · ${parseFloat(draft.VOICE_RELAY_TTS_SPEED || "1").toFixed(2)}×`;
+  const llm = provider("llm"), app = state.catalog.llm[llm].url;
+  $("llm-server").classList.toggle("hidden", llm !== "compatible");
+  $("stt-server").classList.toggle("hidden", provider("stt") !== "compatible");
+  $("tts-server").classList.toggle("hidden", provider("tts") !== "compatible");
+  $("browse").classList.toggle("hidden", llm !== "openrouter");
+  listServerModels(app || (llm === "compatible" ? (draft.VOICE_RELAY_LLM_URL || "").trim() : ""));
+  $("VOICE_RELAY_LLM_MODEL").hint = app ? `The model name in ${state.catalog.llm[llm].name}, at ${app}.` : llm === "compatible" ? "The model name the server serves."
+    : draft.VOICE_RELAY_LLM_MODEL ? "" : `Empty uses ${state.default_models[llm]}, the recommended model.`;
+}
+
+const serverModels = {};
+async function listServerModels(url) {
+  const box = $("llm-found");
+  if (!url) { box.replaceChildren(); return; }
+  serverModels[url] ??= api("/settings/server-models", { method: "POST", body: JSON.stringify({ url, key: draft.VOICE_RELAY_LLM_KEY || "", stage: "llm" }) })
+    .catch(error => ({ models: [], error: error.message }));
+  const reply = await serverModels[url];
+  if ((state.catalog.llm[provider("llm")].url || (draft.VOICE_RELAY_LLM_URL || "").trim()) !== url) return;
+  const where = state.catalog.llm[provider("llm")].name;
+  if (!reply.models.length) { box.replaceChildren(el("span", { class: "text", text: reply.error || `${where} serves no model yet.` })); return; }
+  box.replaceChildren(el("span", { class: "text", text: provider("llm") === "compatible" ? "On the server:" : `In ${where}:` }),
+    ...reply.models.slice(0, 20).map(id => el("wa-button", { size: "s", appearance: id === draft.VOICE_RELAY_LLM_MODEL ? "filled" : "outlined", pill: true, text: id,
+      onclick: () => { set("VOICE_RELAY_LLM_MODEL", id); $("VOICE_RELAY_LLM_MODEL").value = id; renderFields(); } })));
+}
+
+function renderPromptState() {
+  const custom = !!draft.prompt;
+  $("prompt-badge").variant = custom ? "brand" : "neutral";
+  $("prompt-badge").textContent = custom ? "Your copy" : "Built-in";
+  $("prompt-outdated").classList.toggle("hidden", !(custom && state.prompt_outdated));
+  $("prompt-reset").disabled = !custom;
+}
+
+async function renderVoices() {
+  const tts = provider("tts"), box = $("voices"), query = ($("voice-search").value || "").trim().toLowerCase();
+  const server = tts === "compatible";  // its voices are the server's own: no list, no default
+  $("voice-search").classList.toggle("hidden", server);
+  box.classList.toggle("hidden", server);
+  $("VOICE_RELAY_TTS_VOICE").placeholder = server ? "A voice your server has" : "Picked from the list, or paste one";
+  if (server) return;
+  if (!voiceCache[tts]) {
+    box.replaceChildren(el("div", { class: "empty" }, el("wa-spinner"), " Loading voices"));
+    try { voiceCache[tts] = await api(`/settings/voices?provider=${tts}`); } catch (error) { voiceCache[tts] = { voices: [], error: error.message }; }
+    if (provider("tts") !== tts) return;
+  }
+  const { voices, error } = voiceCache[tts];
+  const chosen = draft.VOICE_RELAY_TTS_VOICE || "";
+  const fallback = query ? [] : [{ id: "", name: "Provider default", detail: "The voice the provider picks" }];
+  const shown = [...fallback, ...voices.filter(v => !query || `${v.name} ${v.detail || ""}`.toLowerCase().includes(query))];
+  if (shown.length === fallback.length && (error || query)) {
+    box.replaceChildren(el("div", { class: "empty", text: error || "No voice matches." })); return;
+  }
+  box.replaceChildren(...shown.map(v => {
+    const checked = v.id === chosen || (!chosen && v.id === "");
+    const play = v.preview ? el("wa-button", { size: "s", appearance: "outlined", pill: true, "aria-label": `Play a sample of ${v.name}`, html: PLAY,
+      onclick: e => { e.stopPropagation(); preview(v.preview, e.currentTarget); } }) : null;
+    const row = el("div", { class: "voice", role: "radio", tabindex: checked ? "0" : "-1", "aria-checked": String(checked) },
+      el("div", { class: "meta" }, el("div", { class: "name", text: v.name }), v.detail ? el("div", { class: "detail", text: v.detail }) : null),
+      play, el("span", { class: "tick", "aria-hidden": "true", text: "✓" }));
+    const pick = () => { if (locked("VOICE_RELAY_TTS_VOICE")) return; set("VOICE_RELAY_TTS_VOICE", v.id); $("VOICE_RELAY_TTS_VOICE").value = v.id; renderVoices(); renderProviders(); };
+    row.addEventListener("click", pick);
+    row.addEventListener("keydown", e => {
+      if (e.key === " " || e.key === "Enter") { e.preventDefault(); pick(); }
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); (e.key === "ArrowDown" ? row.nextElementSibling : row.previousElementSibling)?.focus(); }
+    });
+    return row;
+  }));
+}
+
+function preview(url, button) {
+  if (audio) { audio.pause(); if (playing) playing.innerHTML = PLAY; }
+  if (playing === button) { playing = null; return; }
+  audio = new Audio(url); playing = button; button.innerHTML = STOP;
+  audio.onended = () => { button.innerHTML = PLAY; playing = null; };
+  audio.play().catch(() => toast("The sample did not play.", "danger"));
+}
+
+function renderModels() {
+  const query = ($("model-search").value || "").trim().toLowerCase();
+  const list = models.filter(m => !query || `${m.name} ${m.id}`.toLowerCase().includes(query)).slice(0, 150);
+  $("models").replaceChildren(...(list.length ? list.map(m => el("div", { class: "model", role: "option", tabindex: "0",
+    onkeydown: e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.currentTarget.click(); } },
+    onclick: () => { set("VOICE_RELAY_LLM_MODEL", m.id); $("VOICE_RELAY_LLM_MODEL").value = m.id; $("models-dialog").open = false; renderFields(); } },
+    el("span", {}, el("span", { text: m.name }), m.id === state.recommended ? el("wa-badge", { variant: "brand", appearance: "filled", pill: true, text: "Recommended", style: "margin-left: 8px" }) : null),
+    el("span", { class: "id", text: m.id }),
+    el("span", { class: "price", text: `$${m.input.toFixed(2)} / $${m.output.toFixed(2)}` }))) : [el("div", { class: "empty", text: models.length ? "No model matches." : "Loading models…" })]));
+}
+
+function renderKeys() {
+  const used = new Set(Object.keys(KINDS).map(k => state.key_names[provider(k)]).filter(Boolean));
+  const names = Object.keys(state.key_links).sort((a, b) => used.has(b) - used.has(a));
+  $("keys").replaceChildren(...names.map(name => {
+    const [title, link] = state.key_links[name];
+    const isLocked = locked(name), isSaved = state.keys[name], removing = removals.has(name);
+    const input = el("wa-input", { type: "password", "password-toggle": true, size: "s", autocomplete: "off", disabled: isLocked,
+      placeholder: isLocked ? "Set in the shell environment" : isSaved ? "Paste a new key to replace it" : "Paste the key", "aria-label": `${title} API key` });
+    input.value = draft[name] || "";
+    input.addEventListener("input", () => { set(name, input.value); renderProviders(); });
+    const [label, variant] = removing ? ["Will be removed", "warning"] : isLocked ? ["From shell", "neutral"]
+      : isSaved ? ["Saved", "success"] : used.has(name) ? ["Missing", "warning"] : ["Not set", "neutral"];
+    const remove = isSaved && !isLocked ? el("wa-button", { size: "s", appearance: "outlined", text: removing ? "Undo" : "Remove",
+      onclick: () => { removing ? removals.delete(name) : removals.add(name); render(); } }) : el("span");
+    return el("div", { class: "key" },
+      el("div", { class: "title" }, el("span", {}, title, used.has(name) ? el("wa-badge", { variant: "brand", appearance: "filled", pill: true, text: "In use", style: "margin-left: 6px" }) : null),
+        el("a", { href: link, target: "_blank", rel: "noopener", text: "Get a key ↗" })),
+      input, remove, el("wa-badge", { variant, appearance: "filled", pill: true, text: label }));
+  }));
+}
+
+function renderStatus() {
+  const badge = $("status"), box = $("problems");
+  if (state.problems.length) {
+    badge.variant = "warning"; badge.textContent = `${state.problems.length} to fix`;
+    box.replaceChildren(el("strong", { text: "The voice page cannot connect until these are fixed:" }),
+      el("ul", { style: "margin: 6px 0 0; padding-left: 18px" }, ...state.problems.map(p => el("li", { text: friendly(p) }))));
+    box.classList.remove("hidden");
+  } else { badge.variant = "success"; badge.textContent = "Ready"; box.classList.add("hidden"); }
+}
+
+function friendly(problem) {
+  const missing = problem.match(/^(\w+_API_KEY): expected an API key for (\w+)/);
+  if (missing) return `Add a ${state.key_links[missing[1]]?.[0] || missing[2]} API key below.`;
+  const server = problem.match(/^VOICE_RELAY_(STT|LLM|TTS)_(URL|MODEL|VOICE):/);
+  if (server) return `${{ STT: "Speech recognition", LLM: "Agent model", TTS: "Voice" }[server[1]]}: set the ${server[2].toLowerCase()} of your server.`;
+  const model = problem.match(/^VOICE_RELAY_\w+: expected the (\w+) model on this computer/);
+  if (model) return `Install ${model[1]} under On this computer below.`;
+  return problem;
+}
+
+function validate() {
+  const errors = [];
+  const check = (id, message, hint) => { const node = $(id); node.hint = message || hint || ""; node.classList.toggle("error", !!message); if (message) errors.push(message); };
+  const body = ($("VOICE_RELAY_LLM_BODY").value || "").trim();
+  let bodyError = "";
+  if (body) { try { const v = JSON.parse(body); if (typeof v !== "object" || Array.isArray(v) || v === null) bodyError = "Enter a JSON object, for example {\"key\": \"value\"}."; } catch { bodyError = "This is not valid JSON. Check quotes and braces."; } }
+  check("VOICE_RELAY_LLM_BODY", bodyError, "A JSON object merged into each model request.");
+  const url = ($("VOICE_RELAY_LLM_URL").value || "").trim();
+  check("VOICE_RELAY_LLM_URL", url && !/^https?:\/\/\S+$/.test(url) ? "Enter a URL that starts with http:// or https://."
+    : provider("llm") === "compatible" && !url ? "A custom server needs its URL." : "");
+  const n = String($("VOICE_RELAY_NARRATION_SECONDS").value ?? "").trim();
+  check("VOICE_RELAY_NARRATION_SECONDS", n && (isNaN(+n) || +n < 10 || +n > 300) ? "Enter a number of seconds from 10 to 300." : "",
+    "While Claude Code works, the agent says what it does no more often than this.");
+  return errors.length === 0;
+}
+
+function toast(message, variant = "success") { $("toast").create(message, { variant, duration: 3500 }); }
+
+function renderLocal() {
+  const warning = state.machine.warning;
+  $("machine").textContent = warning;
+  $("machine").classList.toggle("hidden", !warning);
+  const inUse = new Set([provider("stt"), provider("tts")]);
+  $("local-models").replaceChildren(...Object.values(state.local).map(model => {
+    const downloading = ["installing", "downloading"].includes(model.state);
+    const [label, variant] = { ready: ["Installed", "success"], installing: ["Installing", "brand"], downloading: [`Downloading ${Math.round(model.progress * 100)}%`, "brand"],
+      failed: ["Failed", "danger"], missing: ["Not installed", "neutral"] }[model.state];
+    const action = model.state === "ready"
+      ? el("wa-button", { size: "s", appearance: "outlined", text: "Remove", disabled: inUse.has(model.provider),
+          title: inUse.has(model.provider) ? "In use: pick another provider first" : false, onclick: () => localAction(model.provider, "remove") })
+      : el("wa-button", { size: "s", appearance: "outlined", text: model.state === "failed" ? "Retry" : "Install", loading: downloading,
+          onclick: async () => { if (await confirmInstall([model])) localAction(model.provider, "install"); } });
+    return el("div", { class: "key" },
+      el("div", { class: "title" }, el("span", { text: `${model.title} · ${model.variant}` }),
+        el("small", { class: "text", text: model.megabytes ? `${hintOf(model)} · ${model.megabytes} MB to download` : hintOf(model) })),
+      downloading ? el("wa-progress-bar", { value: Math.round(model.progress * 100), label: `${model.title} download` })
+        : el("span", { class: "text", text: model.state === "failed" ? model.error : "" }),
+      action, el("wa-badge", { variant, appearance: "filled", pill: true, text: label }));
+  }));
+}
+
+const hintOf = model => state.catalog[model.stage][model.provider].hint;
+const settingValues = () => Object.fromEntries(state.fieldNames.filter(name => name.startsWith("VOICE_RELAY_")).map(name => [name, draft[name] ?? ""]));
+const engineState = (provider, values) => api("/settings/engine", { method: "POST", body: JSON.stringify({ provider, values }) });
+const engineCache = {};
+
+function engineBadge(kind, id) {  // for the values on the page, saved or not
+  const badge = el("wa-badge", { appearance: "filled", pill: true, variant: "neutral", text: "Checking" });
+  const values = settingValues(), key = `${id} ${JSON.stringify(values)}`;
+  const show = engine => Object.assign(badge, engine.state === "ready" ? { variant: "success", textContent: "Installed" }
+    : { variant: "warning", textContent: `Not installed · ${engine.megabytes} MB` });
+  if (engineCache[key]) show(engineCache[key]);
+  else engineState(id, values).then(engine => { engineCache[key] = engine; show(engine); }).catch(() => badge.remove());
+  return badge;
+}
+
+function confirmInstall(models) {
+  const missing = models.filter(model => model.state !== "ready");
+  if (!missing.length) return Promise.resolve(true);
+  const total = missing.reduce((sum, model) => sum + model.megabytes, 0);
+  $("install-text").replaceChildren(
+    el("p", { style: "margin: 0 0 8px", text: `This downloads about ${total} MB to this computer, once. It then runs here, with no key and nothing sent out.` }),
+    el("ul", { style: "margin: 0; padding-left: 18px" }, ...missing.map(model => el("li", { text: `${model.title} ${model.variant}, about ${model.megabytes} MB` }))),
+    el("p", { style: "margin: 8px 0 0", class: "text", text: "You can remove it any time under On this computer in the settings." }));
+  $("install-warning").textContent = state.machine.warning;
+  $("install-warning").classList.toggle("hidden", !state.machine.warning);
+  const dialog = $("install-dialog");
+  dialog.open = true;
+  return new Promise(resolve => {
+    const done = answer => { dialog.open = false; $("install-ok").onclick = $("install-cancel").onclick = null; dialog.removeEventListener("wa-hide", cancel); resolve(answer); };
+    const cancel = event => { if (event.target === dialog) done(false); };
+    $("install-ok").onclick = () => done(true);
+    $("install-cancel").onclick = () => done(false);
+    dialog.addEventListener("wa-hide", cancel);
+  });
+}
+
+let watching = null;
+async function localAction(name, action) {
+  try {
+    const next = await api("/settings/local", { method: "POST", body: JSON.stringify({ provider: name, action }) });
+    Object.assign(state, { local: next.local, problems: next.problems });
+    renderLocal(); renderStatus();
+    if (action === "remove") toast(`${state.local[name].title} removed from this computer.`);
+  } catch (error) { toast(error.message, "danger"); }
+  watching ??= setInterval(async () => {
+    const next = await api("/settings/state").catch(() => null);
+    if (!next) return;
+    Object.assign(state, { local: next.local, problems: next.problems });
+    renderLocal(); renderStatus();
+    if (!Object.values(state.local).some(model => ["installing", "downloading"].includes(model.state))) { clearInterval(watching); watching = null; }
+  }, 1000);
+}
+
+async function renderLanguages() {
+  const stt = provider("stt"), select = $("VOICE_RELAY_STT_LANGUAGE");
+  languageCache[stt] ??= await api(`/settings/languages?provider=${stt}`).catch(error => ({ codes: [], error: error.message }));
+  if (provider("stt") !== stt) return;
+  const { codes, error } = languageCache[stt], lang = draft.VOICE_RELAY_STT_LANGUAGE || "";
+  const rows = codes.map(code => [code, languageName(code)]).sort((a, b) => a[1].localeCompare(b[1]));
+  if (lang && !codes.includes(lang)) rows.unshift([lang, `${languageName(lang)}, not listed for this provider`]);
+  fillSelect(select, [option(DEFAULT, "Provider default"), ...rows.map(([code, name]) => option(code, name))], lang || DEFAULT);
+  select.hint = error || `${codes.length} languages, from the provider's own list.`;
+}
+
+function render() { renderProviders(); renderFields(); renderLanguages(); renderKeys(); renderLocal(); renderStatus(); renderVoices(); updateBar(); }
+
+async function load() {
+  state = await api("/settings/state");
+  state.fieldNames = Object.keys(state.values);
+  saved = { ...state.values }; draft = { ...state.values }; removals = new Set();
+  render();
+}
+
+async function save() {
+  if (!validate()) { toast("Fix the marked fields first.", "danger"); return; }
+  const values = settingValues();  // ask before saving: Cancel leaves the settings as they were
+  const local = [provider("stt"), provider("tts")].filter(name => state.local[name]);
+  const missing = (await Promise.all(local.map(name => engineState(name, values)))).filter(engine => engine.state !== "ready");
+  if (!(await confirmInstall(missing))) { toast("Not saved.", "warning"); return; }
+  const button = $("save"); button.loading = true;
+  try {
+    const next = await api("/settings/state", { method: "POST", body: JSON.stringify(changes()) });
+    state = { ...next, fieldNames: state.fieldNames };
+    saved = { ...state.values }; draft = { ...state.values }; removals = new Set();
+    render(); toast("Saved. Reload the voice window to use it now.");
+  } catch (error) { toast(error.message, "danger"); return; }
+  finally { button.loading = false; }
+  for (const engine of missing) localAction(engine.provider, "install");
+}
+
+await Promise.all(["wa-select", "wa-input", "wa-textarea", "wa-slider", "wa-toast"].map(tag => customElements.whenDefined(tag)));
+function choose(kind, picked) {
+  const name = KINDS[kind];
+  if (picked === provider(kind)) return;
+  set(name, picked);
+  set(`${name}_MODEL`, "");  // a model name belongs to the provider it was picked for
+  if (kind === "tts") set("VOICE_RELAY_TTS_VOICE", "");
+  render(); validate();
+}
+
+for (const [kind, name] of Object.entries(KINDS)) {
+  $(name).addEventListener("change", e => { if (e.target === $(name)) choose(kind, $(name).value); });
+  $(`${kind}-where`).addEventListener("change", e => {
+    const where = e.target.closest("wa-radio-group").value;
+    const kept = saved[name] || state.providers[kind][0];  // back to API: the saved one, if it was one
+    const api = state.catalog[kind][kept].where === "api" ? kept : state.providers[kind].find(other => state.catalog[kind][other].where === "api");
+    const first = state.providers[kind].find(other => state.catalog[kind][other].where === where);
+    choose(kind, where === "api" ? api : state.catalog[kind][kept].where === where ? kept : first);
+  });
+}
+$("whisper-size").addEventListener("change", () => { set("VOICE_RELAY_STT_MODEL", $("whisper-size").value); renderProviders(); });
+$("VOICE_RELAY_STT_LANGUAGE").addEventListener("change", () => {
+  set("VOICE_RELAY_STT_LANGUAGE", $("VOICE_RELAY_STT_LANGUAGE").value === DEFAULT ? "" : $("VOICE_RELAY_STT_LANGUAGE").value);
+  renderProviders();  // Moonshine has a model per language
+});
+$("VOICE_RELAY_LLM_URL").addEventListener("change", renderFields);
+for (const name of ["VOICE_RELAY_STT_MODEL", "VOICE_RELAY_STT_URL", "VOICE_RELAY_STT_KEY", "VOICE_RELAY_LLM_MODEL", "VOICE_RELAY_LLM_URL",
+  "VOICE_RELAY_LLM_KEY", "VOICE_RELAY_LLM_BODY", "VOICE_RELAY_TTS_VOICE", "VOICE_RELAY_TTS_MODEL", "VOICE_RELAY_TTS_URL", "VOICE_RELAY_TTS_KEY",
+  "rules", "VOICE_RELAY_PROJECTS", "VOICE_RELAY_NARRATION_SECONDS"]) {
+  $(name).addEventListener("input", () => { set(name, String($(name).value ?? "")); if (name === "VOICE_RELAY_TTS_VOICE") renderVoices(); if (name === "VOICE_RELAY_LLM_MODEL") renderFields(); });
+  $(name).addEventListener("blur", validate);
+}
+$("VOICE_RELAY_TTS_SPEED").valueFormatter = v => `${Number(v).toFixed(2)}×`;
+const speedLabel = () => { $("VOICE_RELAY_TTS_SPEED").label = `Speed · ${Number($("VOICE_RELAY_TTS_SPEED").value).toFixed(2)}×`; };
+$("VOICE_RELAY_TTS_SPEED").addEventListener("input", () => { const v = Number($("VOICE_RELAY_TTS_SPEED").value); set("VOICE_RELAY_TTS_SPEED", v === 1 ? "" : v.toFixed(2)); speedLabel(); });
+$("prompt").addEventListener("input", () => {
+  const text = String($("prompt").value ?? "");
+  set("prompt", text.trim() === state.builtin_prompt.trim() ? "" : text); renderPromptState();
+});
+$("prompt-reset").addEventListener("click", () => { set("prompt", ""); $("prompt").value = state.builtin_prompt; renderPromptState(); });
+$("voice-search").addEventListener("input", renderVoices);
+$("voice-search").addEventListener("wa-clear", renderVoices);
+$("browse").addEventListener("click", () => { $("models-dialog").open = true; renderModels(); });
+$("model-search").addEventListener("input", renderModels);
+$("save").addEventListener("click", save);
+for (const button of document.querySelectorAll("[data-test]")) {
+  button.addEventListener("click", async () => {
+    const stage = button.dataset.test, box = $(`verdict-${stage}`);
+    if (Object.keys(changes()).length) { toast("Save your changes first, then test.", "warning"); return; }
+    button.loading = true; box.className = "verdict busy"; box.textContent = "Testing with real input…";
+    const result = await api("/settings/test", { method: "POST", body: JSON.stringify({ stage }) }).catch(error => ({ ok: false, summary: error.message }));
+    box.className = `verdict ${result.ok ? "ok" : "bad"}`;
+    box.replaceChildren(...[el("span", { text: `${result.ok ? "✓" : "✗"} ${result.summary}` }),
+      result.audio && el("a", { href: "#", text: "▶ listen", onclick: event => { event.preventDefault(); new Audio(result.audio).play(); } })].filter(Boolean));
+    button.loading = false;
+  });
+}
+$("discard").addEventListener("click", () => { draft = { ...saved }; removals = new Set(); render(); validate(); });
+document.addEventListener("keydown", e => { if ((e.metaKey || e.ctrlKey) && e.key === "s") { e.preventDefault(); if (Object.keys(changes()).length) save(); } });
+window.addEventListener("beforeunload", e => { if (state && Object.keys(changes()).length) { e.preventDefault(); e.returnValue = ""; } });
+
+load().catch(error => { $("status").variant = "danger"; $("status").textContent = "Offline"; toast(error.message, "danger"); });
+api("/settings/models").then(data => { models = data.models || []; if ($("models-dialog").open) renderModels(); }).catch(() => {});
+</script>
+</body>
+</html>

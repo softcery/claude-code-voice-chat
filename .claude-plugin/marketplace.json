@@ -1,0 +1,14 @@
+{
+  "name": "voice-relay",
+  "owner": {
+    "name": "Softcery"
+  },
+  "plugins": [
+    {
+      "name": "voice-relay",
+      "source": "./",
+      "description": "Talk to Claude Code by voice."
+    }
+  ],
+  "description": "Voice relay to Claude Code."
+}

@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en" class="wa-cloak">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>voice-relay</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%234f46e5%27 stroke-width=%272.4%27 stroke-linecap=%27round%27%3E%3Cpath d=%27M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@awesome.me/webawesome@3.14.0/dist-cdn/styles/webawesome.css">
+<script type="module" src="https://cdn.jsdelivr.net/npm/@awesome.me/webawesome@3.14.0/dist-cdn/webawesome.loader.js"></script>
+<script>
+  const dark = matchMedia("(prefers-color-scheme: dark)");
+  const scheme = () => document.documentElement.classList.toggle("wa-dark", dark.matches);
+  scheme(); dark.addEventListener("change", scheme);
+</script>
+<style>
+:root {
+  --brand: #4f46e5; --listening: #16a34a; --working: #2563eb; --waiting: #d97706; --idle: #9ca3af; --bad: #dc2626;
+  --wa-color-brand-fill-loud: #4f46e5; --wa-color-brand-border-loud: #4f46e5; --wa-color-brand-on-loud: #fff;
+  --wa-form-control-activated-color: #4f46e5; --wa-color-focus: #6d64f0;
+}
+.wa-dark {
+  --brand: #8b87ff; --listening: #4ade80; --working: #60a5fa; --waiting: #fbbf24; --idle: #6b7280; --bad: #f87171;
+  --wa-color-brand-fill-loud: #8b87ff; --wa-color-brand-border-loud: #8b87ff; --wa-color-brand-on-loud: #0d0f12;
+  --wa-form-control-activated-color: #8b87ff; --wa-color-focus: #8b87ff;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--wa-color-surface-default); color: var(--wa-color-text-normal); display: flex; flex-direction: column; }
+.top { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; }
+.brand { display: flex; align-items: center; gap: 8px; font-weight: var(--wa-font-weight-semibold); }
+.brand svg { color: var(--brand); }
+.gear { color: var(--wa-color-text-quiet); display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 0; background: none; cursor: pointer; }
+.gear:hover { background: var(--wa-color-neutral-fill-quiet); color: var(--wa-color-text-normal); }
+.gear { padding: 0; }
+main { flex: 1; min-height: 0; width: 100%; max-width: 460px; margin: 0 auto; padding: 0 16px 16px; display: flex; flex-direction: column; }
+.hidden { display: none !important; }
+a { color: var(--wa-color-brand-on-quiet, var(--brand)); }
+
+#setup { display: grid; gap: 14px; padding-top: 4px; }
+#setup h1 { margin: 0; font-size: var(--wa-font-size-xl); }
+#setup > p { margin: 0; color: var(--wa-color-text-quiet); font-size: var(--wa-font-size-s); }
+.part { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--wa-color-surface-border); border-radius: var(--wa-border-radius-l); }
+.part h2 { margin: 0; font-size: var(--wa-font-size-m); text-transform: none; letter-spacing: 0; color: var(--wa-color-text-normal); }
+.part .note { color: var(--wa-color-text-quiet); font-size: var(--wa-font-size-s); }
+.part .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: var(--wa-font-size-s); }
+.chip { border: 1px solid var(--wa-color-surface-border); background: none; color: inherit; border-radius: 999px; padding: 2px 10px; cursor: pointer; font: inherit; font-size: var(--wa-font-size-xs); }
+.chip:hover { background: var(--wa-color-neutral-fill-quiet); }
+.verdict { font-size: var(--wa-font-size-s); display: flex; gap: 8px; align-items: baseline; }
+.verdict.ok { color: var(--listening); }
+.verdict.bad { color: var(--bad); }
+.verdict.busy { color: var(--wa-color-text-quiet); }
+.actions { display: grid; gap: 8px; }
+.links { display: flex; justify-content: space-between; font-size: var(--wa-font-size-s); }
+.tip { display: flex; gap: 8px; align-items: flex-start; font-size: var(--wa-font-size-s); }
+.tip .gear { width: 24px; height: 24px; flex: none; }
+.install { display: grid; gap: 8px; }
+.install small { color: var(--wa-color-text-quiet); }
+.info { display: inline-block; vertical-align: text-bottom; width: 18px; height: 18px; padding: 0; border-radius: 50%; border: 1px solid var(--wa-color-text-quiet); background: none; color: var(--wa-color-text-quiet); font: italic 600 11px/1 Georgia, serif; cursor: help; }
+.info:hover, .info:focus-visible { color: var(--wa-color-text-normal); border-color: var(--wa-color-text-normal); }
+.code::part(input) { font-family: var(--wa-font-family-code); font-size: var(--wa-font-size-s); }
+
+#talk { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 18px; }
+.stage { display: grid; justify-items: center; gap: 10px; padding: 14px 0 4px; }
+.mic {
+  width: 112px; height: 112px; border-radius: 50%; border: 0; cursor: pointer; display: grid; place-items: center;
+  background: var(--brand); color: #fff; box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand) 45%, transparent);
+  transition: background .2s, transform .1s;
+}
+.mic:active { transform: scale(.97); }
+.mic:focus-visible { outline: 3px solid var(--wa-color-focus); outline-offset: 4px; }
+.mic svg { width: 44px; height: 44px; }
+.mic .slash { display: none; }
+.mic[data-state=off] { background: var(--idle); }
+.mic[data-state=muted] { background: var(--idle); }
+.mic[data-state=muted] .slash { display: inline; }
+.mic[data-state=listening] { background: var(--listening); animation: breathe 2.4s ease-in-out infinite; }
+.mic[data-state=speaking] { background: var(--brand); animation: pulse 1s ease-out infinite; }
+@keyframes breathe { 50% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--listening) 18%, transparent); } }
+@keyframes pulse { from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand) 45%, transparent); } to { box-shadow: 0 0 0 22px transparent; } }
+@media (prefers-reduced-motion: reduce) { .mic { animation: none !important; } }
+.status { font-weight: var(--wa-font-weight-semibold); }
+.hint { color: var(--wa-color-text-quiet); font-size: var(--wa-font-size-s); min-height: 1.4em; text-align: center; }
+
+h2 { margin: 0 0 6px; font-size: var(--wa-font-size-xs); text-transform: uppercase; letter-spacing: .06em; color: var(--wa-color-text-quiet); }
+.sessions { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.sessions li { margin: 0; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--wa-border-radius-m); background: var(--wa-color-surface-lowered); font-size: var(--wa-font-size-s); }
+.sessions .name { font-weight: var(--wa-font-weight-semibold); }
+.sessions .doing { margin-left: auto; color: var(--wa-color-text-quiet); }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--idle); flex: none; }
+.dot.working { background: var(--working); }
+.dot.waiting { background: var(--waiting); }
+li.waiting { outline: 1px solid var(--waiting); }
+.empty { color: var(--wa-color-text-quiet); font-size: var(--wa-font-size-s); }
+
+.log-wrap { flex: 1; min-height: 120px; display: flex; flex-direction: column; }
+.log { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 4px; }
+.line { max-width: 88%; padding: 7px 11px; border-radius: 14px; font-size: var(--wa-font-size-s); line-height: 1.4; }
+.line.you { align-self: flex-end; background: var(--wa-color-brand-fill-quiet, #eef0ff); color: var(--wa-color-brand-on-quiet, #3730a3); border-bottom-right-radius: 4px; }
+.line.agent { align-self: flex-start; background: var(--wa-color-surface-lowered); border-bottom-left-radius: 4px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"/></svg>
+    voice-relay
+  </div>
+  <button class="gear" id="gear" aria-label="Setup" title="Setup">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+  </button>
+</header>
+
+<main>
+  <form id="setup" class="hidden" novalidate>
+    <h1>Set up your voice agent</h1>
+    <p>The recommended choices are set. Paste the keys and press Test and start, or pick another option for any part.</p>
+    <div id="parts" class="actions"></div>
+    <div id="install" class="install hidden">
+      <wa-progress-bar id="install-bar" value="0" label="Model download"></wa-progress-bar>
+      <small id="install-label"></small>
+    </div>
+    <wa-callout id="all-good" variant="success" class="hidden">All good: each part works. Starting the conversation…</wa-callout>
+    <wa-callout id="setup-error" variant="danger" class="hidden"></wa-callout>
+    <div class="actions">
+      <wa-button id="start" type="submit" variant="brand" size="l">Test and start</wa-button>
+      <wa-button id="anyway" class="hidden" appearance="outlined">Start anyway</wa-button>
+    </div>
+    <div class="links">
+      <a href="#" id="back" class="hidden">Back to talking</a>
+      <a href="/settings" target="_blank">All settings: voices, language, prompt</a>
+    </div>
+  </form>
+
+  <section id="talk" class="hidden" aria-label="Voice">
+    <wa-callout id="tip" variant="brand" class="hidden">
+      <div class="tip">
+        <span>You're set. Voices, language, speed, the model and your own rules for the agent are under ⚙, then <a href="/settings" target="_blank">All settings ↗</a>.</span>
+        <button class="gear" id="tip-close" aria-label="Close the tip" title="Close">✕</button>
+      </div>
+    </wa-callout>
+    <div class="stage">
+      <button class="mic" id="mic" data-state="off" aria-label="Connect">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/><path class="slash" d="M4 4l16 16"/>
+        </svg>
+      </button>
+      <div class="status" id="status" role="status">Connecting</div>
+      <div class="hint" id="hint"></div>
+      <wa-button id="sound" class="hidden" size="s" variant="brand" appearance="outlined">Turn on sound</wa-button>
+    </div>
+    <div>
+      <h2>Claude Code sessions</h2>
+      <ul class="sessions" id="sessions"></ul>
+    </div>
+    <div class="log-wrap">
+      <h2>Conversation</h2>
+      <div class="log" id="log" aria-live="polite"></div>
+    </div>
+  </section>
+</main>
+
+<wa-dialog id="install-dialog" label="Install on this computer?">
+  <div class="install">
+    <div id="install-text"></div>
+    <wa-callout id="install-warning" variant="warning" class="hidden"></wa-callout>
+  </div>
+  <wa-button slot="footer" id="install-cancel" appearance="plain" variant="neutral">Cancel</wa-button>
+  <wa-button slot="footer" id="install-ok" variant="brand">Install</wa-button>
+</wa-dialog>
+
+<script type="module">
+import { PipecatClient } from "https://cdn.jsdelivr.net/npm/@pipecat-ai/client-js@1.13.1/+esm";
+import { SmallWebRTCTransport } from "https://cdn.jsdelivr.net/npm/@pipecat-ai/small-webrtc-transport@1.10.8/+esm";
+
+const TOKEN = "{{TOKEN}}";
+const PARTS = { stt: "Speech recognition", llm: "Agent model", tts: "Voice" };
+const WHERE = [["api", "API"], ["local", "This computer"], ["server", "Your server"]];
+const DEFAULT = "__default__";  // wa-select needs a non-empty value for the provider default
+const LANGUAGE_NAMES = new Intl.DisplayNames(["en"], { type: "language" });
+const DOING = { working: "works", waiting: "waits for your OK", idle: "idle" };
+const KEPT_LINES = 80;
+const $ = id => document.getElementById(id);
+const audio = new Audio();
+let state = null, picks = {}, typed = {}, client = null, connected = false, muted = false, speaking = false, lastAgent = null;
+
+function el(tag, props = {}, ...children) {
+  const node = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === "class") node.className = v; else if (k === "text") node.textContent = v;
+    else if (k.startsWith("on")) node.addEventListener(k.slice(2), v); else if (v !== false && v != null) node.setAttribute(k, v === true ? "" : v);
+  }
+  node.append(...children.filter(Boolean));
+  return node;
+}
+
+async function api(path, body, headers = { "x-voice-relay": TOKEN }) {
+  const reply = await fetch(path, { method: body ? "POST" : "GET", body: body && JSON.stringify(body), headers: { ...headers, "content-type": "application/json" } });
+  const data = reply.status === 204 ? {} : await reply.json().catch(() => ({}));
+  if (!reply.ok) throw new Error(data.detail || `The server answered ${reply.status}`);
+  return data;
+}
+const desktopApi = (path, body) => api(path, body, { authorization: `Bearer ${TOKEN}` });
+
+/* Setup: three parts, each on an API, on this computer or on the operator's server. */
+
+const env = stage => `VOICE_RELAY_${stage.toUpperCase()}`;
+const saved = stage => state.values[env(stage)] || state.providers[stage][0];
+const whereOf = (stage, provider) => state.catalog[stage][provider].where;
+const on = (stage, where) => state.providers[stage].filter(name => whereOf(stage, name) === where);
+
+function pickFor(stage, where) {
+  const current = saved(stage);
+  const provider = whereOf(stage, current) === where ? current : where === "server" ? "compatible" : on(stage, where)[0];
+  return { where, provider };
+}
+
+function renderParts() { $("parts").replaceChildren(...Object.keys(PARTS).map(renderPart)); }
+
+function renderPart(stage) {
+  const pick = picks[stage];
+  const group = el("wa-radio-group", { orientation: "horizontal", size: "s", label: PARTS[stage], value: pick.where });
+  group.append(...WHERE.map(([value, label]) => el("wa-radio", { value, appearance: "button", text: label })));
+  group.addEventListener("change", () => { picks[stage] = pickFor(stage, group.value); renderParts(); });
+  return el("section", { class: "part", id: `part-${stage}` }, group, fields(stage, pick), el("div", { class: "verdict", id: `verdict-${stage}` }));
+}
+
+function fields(stage, { where, provider }) {
+  const box = el("div", { class: "actions" });
+  const name = env(stage), mine = provider === saved(stage);
+  if (where !== "server") box.append(choice(stage, where, provider));
+  if (where === "api") {
+    const chosen = mine && state.values[`${name}_MODEL`];
+    const model = stage === "llm" ? ` Model: ${chosen || state.default_models[provider]}` : "";
+    box.append(el("div", { class: "note", text: state.catalog[stage][provider].hint + model }));
+    const keyName = state.key_names[provider];
+    const owner = Object.keys(PARTS).find(other => state.key_names[picks[other].provider] === keyName);
+    if (keyName && owner === stage) box.append(keyField(keyName, state.key_links[keyName]));
+    else if (keyName) box.append(el("div", { class: "note", text: `Uses the ${state.key_links[keyName][0]} key above.` }));
+    return box;
+  }
+  if (where === "local") box.append(about(stage, provider));
+  if (where === "local" && stage === "stt") {
+    if (provider === "whisper") {
+      const sizes = Object.entries(state.whisper_models).map(([size, mb]) => [size, `${size} · ${mb} MB`]);
+      box.append(pickField(`${name}_MODEL`, "Model size", sizes, (mine && state.values[`${name}_MODEL`]) || "small"));
+    }
+    const language = pickField(`${name}_LANGUAGE`, "Language", [], state.values[`${name}_LANGUAGE`] || DEFAULT);
+    box.append(language);
+    api(`/settings/languages?provider=${provider}`).then(({ codes }) => fill(language, [
+      [DEFAULT, provider === "whisper" ? "Detect the language" : "English, the default"],
+      ...codes.map(code => [code, LANGUAGE_NAMES.of(code) || code]).sort((a, b) => a[1].localeCompare(b[1]))])).catch(() => {});
+    return box;
+  }
+  if (where === "local" && stage === "tts") {
+    const voice = pickField("VOICE_RELAY_TTS_VOICE", "Voice", [], (mine && state.values.VOICE_RELAY_TTS_VOICE) || state.voice_defaults[provider]);
+    box.append(voice);
+    api(`/settings/voices?provider=${provider}`).then(({ voices }) => {
+      const language = (typed.VOICE_RELAY_STT_LANGUAGE ?? state.values.VOICE_RELAY_STT_LANGUAGE ?? "").split("-")[0];
+      const near = !mine && language && voices.find(v => v.id.startsWith(`${language}_`));  // a Piper voice in the operator's language
+      if (near && typed.VOICE_RELAY_TTS_VOICE === undefined) voice.dataset.value = near.id;
+      fill(voice, voices.map(v => [v.id, v.detail ? `${v.name} · ${v.detail}` : v.name]));
+    }).catch(() => {});
+    return box;
+  }
+  const url = where === "local" ? state.catalog[stage][provider].url : state.values[`${name}_URL`] || "";
+  if (where === "server") {
+    box.append(input(`${name}_URL`, "Server URL", url, { placeholder: "http://gpu-box:8000/v1", class: "code" }),
+      input(`${name}_KEY`, "Server key", "", { type: "password", "password-toggle": true, placeholder: state.keys[`${name}_KEY`] ? "Saved; paste to replace" : "Only if the server needs one" }));
+  }
+  const model = input(`${name}_MODEL`, "Model", mine ? state.values[`${name}_MODEL`] || "" : "", { class: "code", placeholder: where === "local" ? `The model name in ${state.catalog[stage][provider].name}` : "The name the server serves" });
+  const found = el("div", { class: "row" });
+  box.append(model, found);
+  const list = async () => {
+    const at = where === "local" ? url : box.querySelector(`[data-env="${name}_URL"]`).value.trim();
+    if (!at) return;
+    found.replaceChildren(el("span", { class: "note", text: "Looking for models…" }));
+    const key = box.querySelector(`[data-env="${name}_KEY"]`)?.value.trim() || "";
+    const reply = await api("/settings/server-models", { url: at, key, stage }).catch(error => ({ models: [], error: error.message }));
+    const app = state.catalog[stage][provider].name;
+    found.replaceChildren(...(reply.models.length
+      ? [el("span", { class: "note", text: where === "local" ? `In ${app}:` : "On the server:" }), ...reply.models.slice(0, 12).map(id => el("button", { type: "button", class: "chip", text: id, onclick: () => { typed[`${name}_MODEL`] = model.value = id; } }))]
+      : [el("span", { class: "note", text: where === "local" ? `${app} is not running, or has no model yet. Start it, then press Test and start.` : reply.error || "The server lists no models." })]));
+    if (reply.models.length === 1 && !model.value) typed[`${name}_MODEL`] = model.value = reply.models[0];
+  };
+  box.querySelector(`[data-env="${name}_URL"]`)?.addEventListener("change", list);
+  list();
+  if (stage === "tts") box.append(input("VOICE_RELAY_TTS_VOICE", "Voice", mine ? state.values.VOICE_RELAY_TTS_VOICE || "" : "", { class: "code", placeholder: "A voice the server has" }));
+  return box;
+}
+
+function choice(stage, where, provider) {
+  const select = el("wa-select", { size: "s", value: provider, "aria-label": `${PARTS[stage]} provider` });
+  select.append(...on(stage, where).map(id => el("wa-option", { value: id, text: state.catalog[stage][id].name })));
+  select.addEventListener("change", () => { picks[stage] = { where, provider: select.value }; renderParts(); });
+  return select;
+}
+
+function about(stage, provider) {
+  const info = state.catalog[stage][provider], engine = state.local[provider];
+  const detail = info.about || `${info.name} installs by itself the first time you start it, after you agree to the download size. It then runs on this computer, with no key and nothing sent out.`;
+  if (engine) setTimeout(() => status(stage, provider));  // once the fields are on the page
+  return el("div", { class: "row" },
+    el("span", { class: "note" }, `${info.hint} `, el("span", { id: `status-${stage}` }),
+      el("button", { type: "button", class: "info", id: `about-${stage}`, "aria-label": `About ${info.name}`, text: "i" })),
+    el("wa-tooltip", { for: `about-${stage}`, text: detail }),
+    info.guide && el("a", { href: info.guide, target: "_blank", rel: "noopener", text: "Setup guide ↗" }));
+}
+
+function partValues(stage) {
+  const values = {};
+  for (const field of $(`part-${stage}`)?.querySelectorAll("[data-env]") || []) values[field.dataset.env] = String(field.value ?? "").replace(DEFAULT, "");
+  return values;
+}
+
+async function engineState(provider, values) {
+  return api("/settings/engine", { provider, values });
+}
+
+async function status(stage, provider) {
+  const box = $(`status-${stage}`);
+  if (!box || picks[stage].provider !== provider) return;
+  const engine = await engineState(provider, partValues(stage)).catch(() => null);
+  if (engine && picks[stage].provider === provider) box.textContent = engine.state === "ready" ? "Installed. " : `Downloads ${engine.megabytes} MB on start. `;
+}
+
+function pickField(envName, label, options, value) {
+  const field = el("wa-select", { size: "s", label, "data-env": envName });
+  field.dataset.value = typed[envName] ?? value;
+  field.addEventListener("change", () => {
+    typed[envName] = String(field.value ?? "");
+    const stage = field.closest(".part").id.slice(5);
+    status(stage, picks[stage].provider);
+  });
+  fill(field, options);
+  return field;
+}
+
+function fill(field, options) {
+  const value = field.dataset.value;
+  const rows = options.some(([id]) => id === value) || !value ? options : [[value, value], ...options];
+  field.replaceChildren(...rows.map(([id, text]) => el("wa-option", { value: id, text })));
+  field.value = value;
+  const part = field.closest(".part");
+  if (part) status(part.id.slice(5), picks[part.id.slice(5)].provider);  // the loaded list can change the pick
+}
+
+function input(envName, label, value, props = {}) {
+  const field = el("wa-input", { size: "s", label, autocomplete: "off", spellcheck: "false", ...props, "data-env": envName });
+  field.value = typed[envName] ?? value;  // what the operator typed survives a re-render
+  field.addEventListener("input", () => { typed[envName] = String(field.value ?? ""); });
+  return field;
+}
+
+function keyField(keyName, [title, link]) {
+  const field = input(keyName, `${title} API key`, "", { type: "password", "password-toggle": true,
+    placeholder: state.keys[keyName] ? "Saved; paste a new key to replace it" : "Paste the key", "data-key": true });
+  field.append(el("a", { slot: "hint", href: link, target: "_blank", rel: "noopener", text: "Get a key ↗" }));
+  return field;
+}
+
+function collect() {
+  const values = {};
+  for (const stage of Object.keys(PARTS)) {
+    const { provider } = picks[stage];
+    const name = env(stage);
+    values[name] = provider;
+    if (provider !== saved(stage)) Object.assign(values, { [`${name}_MODEL`]: "" }, stage === "tts" ? { VOICE_RELAY_TTS_VOICE: "" } : {});
+    for (const field of $(`part-${stage}`).querySelectorAll("[data-env]")) {
+      const value = String(field.value ?? "").trim().replace(DEFAULT, "");
+      const secret = field.hasAttribute("data-key") || field.dataset.env.endsWith("_KEY");
+      if (value || !secret) values[field.dataset.env] = value;
+    }
+  }
+  return values;
+}
+
+function verdict(stage, kind, text, audioUrl) {
+  const box = $(`verdict-${stage}`);
+  box.className = `verdict ${kind}`;
+  box.replaceChildren(...[el("span", { text: { ok: "✓ ", bad: "✗ ", busy: "… " }[kind] + text }),
+    audioUrl && el("a", { href: "#", text: "▶ listen", onclick: event => { event.preventDefault(); new Audio(audioUrl).play(); } })].filter(Boolean));
+}
+
+function stageOf(problem) {
+  const named = problem.match(/^VOICE_RELAY_(STT|LLM|TTS)/);
+  if (named) return named[1].toLowerCase();
+  return Object.keys(PARTS).find(stage => problem.startsWith(`${state.key_names[picks[stage].provider]}:`));
+}
+
+function friendly(problem) {
+  const key = problem.match(/^(\w+_API_KEY):/);
+  if (key) return `Paste the ${state.key_links[key[1]]?.[0] || key[1]} key.`;
+  return problem.replace(/^VOICE_RELAY_\w+?: /, "").replace(/^expected /, "Missing: ");
+}
+
+function confirmInstall(missing) {
+  if (!missing.length) return Promise.resolve(true);
+  const total = missing.reduce((sum, model) => sum + model.megabytes, 0);
+  $("install-text").textContent = `This downloads about ${total} MB to this computer, once: ${missing.map(model => `${model.title}, ${model.megabytes} MB`).join("; ")}. It then runs here, with no key and nothing sent out. You can remove it any time in All settings.`;
+  $("install-warning").textContent = state.machine.warning;
+  $("install-warning").classList.toggle("hidden", !state.machine.warning);
+  const dialog = $("install-dialog");
+  dialog.open = true;
+  return new Promise(resolve => {
+    const done = answer => { dialog.open = false; dialog.removeEventListener("wa-hide", hidden); resolve(answer); };
+    const hidden = event => { if (event.target === dialog) done(false); };
+    $("install-ok").onclick = () => done(true);
+    $("install-cancel").onclick = () => done(false);
+    dialog.addEventListener("wa-hide", hidden);
+  });
+}
+
+async function download(models) {
+  const sizes = Object.fromEntries(models.map(model => [model.provider, model.megabytes]));  // taken once: the state drops what has landed
+  const total = Object.values(sizes).reduce((sum, mb) => sum + mb, 0);
+  const busy = name => ["installing", "downloading"].includes(state.local[name].state);
+  for (const name of Object.keys(sizes)) state = await api("/settings/local", { provider: name, action: "install" });
+  $("install").classList.remove("hidden");
+  while (Object.keys(sizes).some(busy)) {
+    const done = Object.entries(sizes).reduce((sum, [name, mb]) => sum + mb * (busy(name) ? state.local[name].progress : 1), 0);
+    const installing = Object.keys(sizes).find(name => state.local[name].state === "installing");
+    $("install-bar").value = Math.round((done / total) * 100);
+    $("install-label").textContent = installing ? `Installing ${state.local[installing].title}…` : `Downloading: ${Math.round(done)} of ${total} MB`;
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    state = await api("/settings/state");
+  }
+  $("install").classList.add("hidden");
+  const failed = Object.keys(sizes).map(name => state.local[name]).find(model => model.state === "failed");
+  if (failed) throw new Error(`${failed.title} did not install: ${failed.error}`);
+}
+
+async function testAndStart(event) {
+  event?.preventDefault();
+  $("anyway").classList.add("hidden");
+  $("all-good").classList.add("hidden");
+  $("setup-error").classList.add("hidden");
+  $("start").loading = true;
+  try {
+    const values = collect();  // ask before saving: Cancel leaves the settings as they were
+    const local = Object.values(picks).filter(pick => state.local[pick.provider]);
+    const engines = await Promise.all(local.map(pick => engineState(pick.provider, values)));
+    const missing = engines.filter(engine => engine.state !== "ready");
+    if (!(await confirmInstall(missing))) return;
+    state = await api("/settings/state", values);
+    picks = Object.fromEntries(Object.keys(PARTS).map(stage => [stage, { where: whereOf(stage, saved(stage)), provider: saved(stage) }]));
+    for (const stage of Object.keys(PARTS)) verdict(stage, "busy", "testing…");
+    await download(missing);
+    const open = state.problems.filter(problem => !/model on this computer/.test(problem));
+    if (open.length) {
+      for (const stage of Object.keys(PARTS)) $(`verdict-${stage}`).replaceChildren();
+      for (const problem of open) { const stage = stageOf(problem); if (stage) verdict(stage, "bad", friendly(problem)); }
+      return;
+    }
+    const results = await Promise.all(Object.keys(PARTS).map(async stage => {
+      const result = await api("/settings/test", { stage }).catch(error => ({ ok: false, summary: error.message }));
+      verdict(stage, result.ok ? "ok" : "bad", result.summary, result.audio);
+      return result.ok;
+    }));
+    if (results.every(Boolean)) {
+      $("all-good").classList.remove("hidden");
+      $("tip").classList.remove("hidden");
+      setTimeout(start, 1500);
+      return;
+    }
+    $("anyway").classList.remove("hidden");
+  } catch (error) {
+    for (const stage of Object.keys(PARTS)) $(`verdict-${stage}`).replaceChildren();
+    $("setup-error").textContent = error.message;
+    $("setup-error").classList.remove("hidden");
+  } finally { $("start").loading = false; }
+}
+
+async function showSetup() {
+  state = await api("/settings/state");
+  picks = Object.fromEntries(Object.keys(PARTS).map(stage => [stage, { where: whereOf(stage, saved(stage)), provider: saved(stage) }]));
+  renderParts();
+  $("back").classList.toggle("hidden", !connected);
+  $("talk").classList.add("hidden");
+  $("setup").classList.remove("hidden");
+}
+
+function start() {
+  $("setup").classList.add("hidden");
+  $("talk").classList.remove("hidden");
+  if (client) { client.disconnect(); client = null; connected = false; }  // the new settings apply on connect
+  connect();
+}
+
+/* Talk: the connection, the mic button, the sessions and the conversation. */
+
+async function connect() {
+  if (client) return;
+  show("connecting");
+  client = new PipecatClient({
+    transport: new SmallWebRTCTransport(),
+    enableMic: true,
+    enableCam: false,
+    callbacks: {
+      onTrackStarted(track, participant) {
+        if (participant?.local || track.kind !== "audio") return;
+        audio.srcObject = new MediaStream([track]);
+        audio.play().then(() => $("sound").classList.add("hidden")).catch(() => $("sound").classList.remove("hidden"));
+      },
+      onUserTranscript(data) { if (data.final && data.text.trim()) say("you", data.text); },
+      onBotOutput(data) {  // one message per segment when new, more as its words are spoken
+        if ((data.spoken_status ?? "new") === "new" && data.aggregated_by !== "word" && data.text.trim()) say("agent", data.text);
+      },
+      onBotStartedSpeaking() { speaking = true; show(); },
+      onBotStoppedSpeaking() { speaking = false; lastAgent = null; show(); },
+      onDisconnected() { client = null; connected = false; speaking = false; show(); },
+    },
+  });
+  try {
+    await client.connect({ webrtcRequestParams: { endpoint: "/api/offer" } });
+    connected = true;
+  } catch (error) {
+    client = null;
+    $("hint").textContent = /permission|denied|notallowed/i.test(String(error)) ? "Allow the microphone for this page, then tap." : "Could not connect. Tap to try again.";
+  }
+  show();
+}
+
+function show(phase) {
+  const now = phase || (!connected ? "off" : muted ? "muted" : speaking ? "speaking" : "listening");
+  const [status, hint, label] = {
+    connecting: ["Connecting", "", "Connecting"],
+    off: ["Not connected", $("hint").textContent || "Tap to connect.", "Connect"],
+    muted: ["Muted", "Tap to unmute.", "Unmute"],
+    speaking: ["Speaking", "Talk over it to interrupt.", "Mute"],
+    listening: ["Listening", "Tap to mute.", "Mute"],
+  }[now];
+  $("mic").dataset.state = now;
+  $("mic").setAttribute("aria-label", label);
+  $("status").textContent = status;
+  if (now !== "off") $("hint").textContent = hint;
+}
+
+function say(who, text) {
+  const log = $("log"), last = log.lastElementChild;
+  // recognition cuts one sentence into pieces: the operator's lines in a row stay one bubble
+  const joined = who === "agent" ? lastAgent : last?.classList.contains("you") && who === "you" ? last : null;
+  if (joined) joined.textContent += ` ${text.trim()}`;
+  else {
+    const line = el("div", { class: `line ${who}`, text: text.trim() });
+    log.append(line);
+    lastAgent = who === "agent" ? line : null;
+    while (log.children.length > KEPT_LINES) log.firstElementChild.remove();
+  }
+  log.scrollTop = log.scrollHeight;
+}
+
+function renderSessions(sessions) {
+  if (!sessions.length) {
+    $("sessions").replaceChildren(el("li", { class: "empty", text: "No session linked. Run /voiceagent in Claude Code." }));
+    return;
+  }
+  $("sessions").replaceChildren(...sessions.map(session => {
+    const doing = session.waiting ? "waiting" : session.running ? "working" : "idle";
+    return el("li", { class: doing }, el("span", { class: `dot ${doing}` }), el("span", { class: "name", text: session.name }), el("span", { class: "doing", text: DOING[doing] }));
+  }));
+}
+
+async function poll() {
+  try {
+    const now = await desktopApi("/desktop/state");
+    renderSessions(now.sessions);
+    if (now.muted !== muted) { muted = now.muted; show(); }
+  } catch { /* the server restarts or stops; the next poll tells */ }
+  setTimeout(poll, 2000);
+}
+
+$("mic").addEventListener("click", async () => {
+  if (!connected) { $("hint").textContent = ""; await connect(); return; }
+  muted = !muted; show();
+  await desktopApi("/desktop/mute", { muted }).catch(() => {});
+});
+$("sound").addEventListener("click", () => audio.play().then(() => $("sound").classList.add("hidden")));
+$("setup").addEventListener("submit", testAndStart);
+$("anyway").addEventListener("click", start);
+$("tip-close").addEventListener("click", () => $("tip").classList.add("hidden"));
+$("gear").addEventListener("click", showSetup);
+$("back").addEventListener("click", event => { event.preventDefault(); $("setup").classList.add("hidden"); $("talk").classList.remove("hidden"); });
+addEventListener("pagehide", () => client?.disconnect());
+if (new URLSearchParams(location.search).has("window") && outerWidth > 600) resizeTo(460, 860);
+
+await Promise.all(["wa-button"].map(tag => customElements.whenDefined(tag)));
+state = await api("/settings/state");
+if (state.problems.length) await showSetup();
+else { $("talk").classList.remove("hidden"); connect(); }
+poll();
+</script>
+</body>
+</html>

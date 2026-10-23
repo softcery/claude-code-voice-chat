@@ -1,0 +1,19 @@
+{
+  "name": "voice-relay",
+  "version": "0.1.0",
+  "description": "Talk to Claude Code by voice. A voice agent relays your tasks to your Claude Code sessions and speaks each answer.",
+  "author": {
+    "name": "Softcery"
+  },
+  "license": "MIT",
+  "userConfig": {
+    "port": {
+      "type": "number",
+      "title": "Port",
+      "description": "The local port of the voice server. Pick the services and keys with /voiceagent settings.",
+      "default": 7860,
+      "min": 1024,
+      "max": 65535
+    }
+  }
+}

@@ -1,0 +1,54 @@
+[project]
+name = "voice-relay"
+version = "0.1.0"
+description = "Talk to Claude Code by voice. A pipecat voice agent relays tasks to your Claude Code sessions and speaks each answer."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pipecat-ai[anthropic,assemblyai,cartesia,deepgram,elevenlabs,openai,runner,silero]==1.13.0",
+    "aiortc>=1.14.0,<2",  # pipecat[webrtc] without OpenCV, which only converts video
+    "google-genai>=1.68.0,<3",  # pipecat[google] LLM without the cloud speech clients and grpc
+    "google-api-core>=2.24,<3",
+    "httpx>=0.28",
+    "platformdirs>=4",
+    "pystray==0.19.5",
+    "python-dotenv>=1.0",
+]
+
+# Engines that run on this computer. The server installs one when the operator picks it.
+[project.optional-dependencies]
+moonshine = ["pipecat-ai[moonshine]==1.13.0"]
+whisper = ["pipecat-ai[whisper]==1.13.0"]
+kokoro = ["pipecat-ai[kokoro]==1.13.0"]
+piper = ["pipecat-ai[piper]==1.13.0"]
+pocket = ["pipecat-ai[pocket-tts]==1.13.0"]
+
+[tool.uv]
+# pipecat requires these, but uses them only for an optional resampler (numba,
+# resampy) and onnxruntime's offline tools (sympy): 200 MB the voice server never loads
+override-dependencies = [
+    "numba; sys_platform == 'never'",
+    "resampy; sys_platform == 'never'",
+    "sympy; sys_platform == 'never'",
+]
+
+[project.scripts]
+voice-relay = "voice_relay.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8", "pytest-asyncio>=0.24", "ruff>=0.8", "httpx>=0.27"]
+
+[build-system]
+requires = ["uv_build>=0.8,<0.12"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
