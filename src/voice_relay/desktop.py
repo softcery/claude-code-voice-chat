@@ -167,6 +167,8 @@ def _app_window(url: str) -> list[str] | None:
 def _detached(command: list[str], log: Any) -> subprocess.Popen[bytes]:
     """Starts a process that outlives this one and the Claude Code session above it."""
     streams: dict[str, Any] = {"stdin": subprocess.DEVNULL, "stdout": log, "stderr": log}
+    # the log is a file, so Windows Python would encode it as cp1252 and crash on banners
+    streams["env"] = {**os.environ, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}
     if sys.platform != "win32":
         return subprocess.Popen(command, start_new_session=True, **streams)
     flags = subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
