@@ -47,13 +47,27 @@ https://github.com/user-attachments/assets/49d3535c-d5f0-4ea5-a3b9-139562336463
 
 ## Quick start
 
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/) first: the plugin runs its voice server with it. Then install the plugin:
+
 ```
 claude plugin marketplace add softcery/claude-code-voice-chat && claude plugin install voice-relay@voice-relay
 ```
 
-1. Run `/voiceagent` in Claude Code. A small voice window opens. The first run installs the voice server in about half a minute.
-2. Paste two keys: [ElevenLabs](https://elevenlabs.io/app/settings/api-keys) for speech and [OpenRouter](https://openrouter.ai/keys) for the agent model. Or pick **This computer** for engines that need no key.
-3. Press **Test and start**. Each part gets real input and shows what it heard and how fast it answered. Then talk.
+1. Run `/voiceagent` in Claude Code. The first run installs the voice server in about half a minute. The status line of Claude Code shows `voice-relay: connected as <folder>` when it is up.
+2. A small voice window opens: an app window in Chrome or Edge, else a tab of your default browser. When the browser asks for the microphone, allow it.
+3. The window shows the three parts of the agent. Paste two keys: [ElevenLabs](https://elevenlabs.io/app/settings/api-keys) for speech and [OpenRouter](https://openrouter.ai/keys) for the agent model. Or pick **This computer** for engines that need no key; the window names the download size and asks first.
+4. Press **Test and start**. Each part gets real input and shows what it heard and how fast it answered.
+5. The agent says it is ready. Give your first task: "Tell Claude Code to list the files in this project."
+
+Next times, `/voiceagent` opens the window, and it connects by itself.
+
+### Tips for hands-free work
+
+- Wear headphones. Without them, the agent can hear its own voice.
+- Turn on accept-edits mode in Claude Code (Shift+Tab), or add allow rules for the commands you trust. The agent cannot approve a permission prompt; it only tells you that one waits.
+- Start with the session name when two or more are linked: "In api, run the tests."
+- Say a long task in one go. Short pauses are fine; the agent waits until you finish.
+- To stop the agent's own speech, just talk. To stop Claude Code, say "stop".
 
 ## Things you can say
 
@@ -110,6 +124,28 @@ The voice server runs on its own, so closing the session that started it does no
 ### Tray
 
 The server shows an icon in the system tray (the macOS menu bar). Its colour gives the state: grey with no voice window, green listening, blue Claude Code working, orange Claude Code waiting for your approval, red settings to fix. The menu lists the linked sessions and has Open voice window, Mute microphone, Settings and Quit. Set `VOICE_RELAY_TRAY=off` to run without it. On Linux, the icon needs a desktop with tray support.
+
+### Troubleshooting
+
+| Symptom | What to do |
+| --- | --- |
+| No window opens | Open http://127.0.0.1:7860/voice. If it does not load, read `~/.config/voice-relay/start.log`. |
+| `/voiceagent` reports that `uv` is missing | Install uv, then restart Claude Code so it finds uv on the `PATH`. |
+| The agent interrupts itself or answers its own words | Wear headphones. |
+| "No Claude Code session is listening" | Run `/voiceagent` in that session. The status line shows `connected as <folder>`. |
+| A new session opened by voice does not link | Confirm the folder trust question in its terminal. |
+| Claude Code stops and the agent says it waits for you | A permission prompt waits at the screen. Answer it there, or use accept-edits mode. |
+| The agent mishears names | Pick an API for speech recognition; local engines know fewer names. Rename a folder to a word that is easy to say. |
+| Answers are slow | **Test and start** shows the time of each part. The slowest part is the one to change. |
+| Silence after `/reload-plugins` | Run `/voiceagent` again. |
+| Something else | Read `server.log` in `~/.config/voice-relay/`, and open an issue with its last lines. |
+
+### Uninstall
+
+1. Run `/voiceagent quit` to stop the voice server.
+2. On the settings page, under **On this computer**, remove the local engines you installed. This deletes their models and packages.
+3. Run `claude plugin uninstall voice-relay@voice-relay`, then `claude plugin marketplace remove voice-relay`.
+4. Delete `~/.config/voice-relay/`: your settings, keys, rules and logs.
 
 ## Where each part runs
 
@@ -247,6 +283,29 @@ Security:
 - The mod and tray routes require the token in `~/.config/voice-relay/token` (mode 600). The page API requires the token the pages carry.
 
 Logs: `server.log`, `start.log` and `tray.log` in `~/.config/voice-relay/`.
+
+### What leaves your computer
+
+| Data | Goes to |
+| --- | --- |
+| Your voice | The speech recognition provider you pick. With a local engine, nowhere. |
+| Your words, Claude Code's progress lines and answers, about 6k tokens of each session's visible history | The agent model provider you pick. With a local app or your server, nowhere else. |
+| The agent's replies | The voice provider you pick. With a local engine, nowhere. |
+| Your code and files | Nowhere through voice-relay. Claude Code works as it always does. |
+
+Keys stay in `~/.config/voice-relay/.env` and go only to their own provider.
+
+## FAQ
+
+**How is this different from `/voice`?** `/voice` dictates into the prompt box. voice-relay is an agent that talks back, works with several sessions and does not wait for Claude Code to finish.
+
+**What does it cost?** voice-relay is free. You pay your providers for the speech minutes, tokens and characters of the models you pick. With engines on this computer, the voice part costs nothing.
+
+**Can the agent approve actions?** No. Permission prompts stay at the screen, for you.
+
+**Does it work with other coding agents?** No. It is a Claude Code plugin: the mod lives in Claude Code's events.
+
+**Which languages?** The agent speaks the language you speak, as far as the providers you pick support it. Set the speech recognition language on the settings page; the default is English.
 
 ## Limitations
 
