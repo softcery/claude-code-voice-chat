@@ -188,6 +188,12 @@ def save(values: Mapping[str, str]) -> None:
             unset_key(CONFIG_FILE, name)
 
 
+def version() -> str:
+    """Changes with a setting, key, rule or the prompt: the voice window reconnects on it."""
+    text = json.dumps(environment(), sort_keys=True) + prompt()
+    return hashlib.sha256(text.encode(ENCODING)).hexdigest()[:12]
+
+
 def port() -> int:
     return _number(environment(), "VOICE_RELAY_PORT", 7860, 1024, 65535)
 

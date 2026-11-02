@@ -182,6 +182,7 @@ const KEPT_LINES = 80;
 const $ = id => document.getElementById(id);
 const audio = new Audio();
 let state = null, picks = {}, typed = {}, client = null, connected = false, muted = false, speaking = false, lastAgent = null;
+let config;  // the settings version of the running connection
 
 function el(tag, props = {}, ...children) {
   const node = document.createElement(tag);
@@ -482,8 +483,8 @@ async function showSetup() {
 function start() {
   $("setup").classList.add("hidden");
   $("talk").classList.remove("hidden");
-  if (client) { client.disconnect(); client = null; connected = false; }  // the new settings apply on connect
-  connect();
+  if (client) location.reload();  // the new settings apply on connect, and a client connects once
+  else connect();
 }
 
 /* Talk: the connection, the mic button, the sessions and the conversation. */
@@ -565,6 +566,9 @@ async function poll() {
     const now = await desktopApi("/desktop/state");
     renderSessions(now.sessions);
     if (now.muted !== muted) { muted = now.muted; show(); }
+    const saved = config !== undefined && now.config !== config;  // in the settings page or the file
+    config = now.config;
+    if (saved && connected && $("setup").classList.contains("hidden")) location.reload();
   } catch { /* the server restarts or stops; the next poll tells */ }
   setTimeout(poll, 2000);
 }

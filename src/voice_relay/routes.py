@@ -121,6 +121,7 @@ def mount(
                 "muted": microphone.muted,
                 "sessions": bridge.state(),
                 "problems": len(settings.problems()),
+                "config": settings.version(),
             }
         )
 

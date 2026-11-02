@@ -124,7 +124,7 @@ The agent has three parts: speech recognition, the agent model and the voice. Pi
 
 The agent model only runs the conversation; Claude Code does the work. Pick a fast model with reliable tool calling. Claude Code itself is billed as usual.
 
-The settings page lists the voices of the provider with samples and the OpenRouter models with prices. Changes apply the next time the voice window connects, with no restart. The page uses [Web Awesome](https://webawesome.com) components from jsDelivr, so it needs internet access. It writes `~/.config/voice-relay/.env` (mode 600). You can edit that file instead; a variable in the shell environment overrides it.
+The settings page lists the voices of the provider with samples and the OpenRouter models with prices. Changes apply when you save: the voice window reconnects with them, with no restart. The page uses [Web Awesome](https://webawesome.com) components from jsDelivr, so it needs internet access. It writes `~/.config/voice-relay/.env` (mode 600). You can edit that file instead; a variable in the shell environment overrides it.
 
 <details>
 <summary><b>All settings</b></summary>
