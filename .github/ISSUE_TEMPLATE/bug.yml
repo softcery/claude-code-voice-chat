@@ -1,0 +1,36 @@
+name: Bug
+description: Something does not work as the README says.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, what you got.
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: System
+      placeholder: macOS 15, Windows 11, Ubuntu 24.04
+    validations:
+      required: true
+  - type: input
+    id: claude
+    attributes:
+      label: Claude Code version
+      placeholder: the output of claude --version
+    validations:
+      required: true
+  - type: input
+    id: providers
+    attributes:
+      label: Providers
+      description: Speech recognition, agent model and voice, for example ElevenLabs, OpenRouter, ElevenLabs.
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: The last lines of ~/.config/voice-relay/server.log. Remove keys and private paths first.
+      render: text

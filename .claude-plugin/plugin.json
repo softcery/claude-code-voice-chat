@@ -5,6 +5,8 @@
   "author": {
     "name": "Softcery"
   },
+  "homepage": "https://github.com/softcery/claude-code-voice-chat",
+  "repository": "https://github.com/softcery/claude-code-voice-chat",
   "license": "MIT",
   "userConfig": {
     "port": {
@@ -15,5 +17,13 @@
       "min": 1024,
       "max": 65535
     }
-  }
+  },
+  "keywords": [
+    "voice",
+    "voice-agent",
+    "speech",
+    "pipecat",
+    "hands-free",
+    "sessions"
+  ]
 }

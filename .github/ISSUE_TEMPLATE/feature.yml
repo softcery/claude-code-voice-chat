@@ -1,0 +1,16 @@
+name: Feature
+description: An idea or a missing option.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What you want to do
+      description: The task you want to do by voice, and what stops you now.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+      description: How voice-relay could do it, if you have a view.

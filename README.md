@@ -326,6 +326,14 @@ claude plugin validate .
 claude --plugin-dir .      # load the mod from this checkout
 ```
 
+## Contributing
+
+Bug reports, ideas and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). Report a security issue as [SECURITY.md](SECURITY.md) says.
+
 ## License
 
 [MIT](LICENSE)
+
+---
+
+voice-relay is made by [Softcery](https://softcery.com). We build voice AI agents for products: low latency, natural turn-taking, self-hosted stacks.
