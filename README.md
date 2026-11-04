@@ -50,16 +50,16 @@ https://github.com/user-attachments/assets/49d3535c-d5f0-4ea5-a3b9-139562336463
 Install [uv](https://docs.astral.sh/uv/getting-started/installation/) first: the plugin runs its voice server with it. Then install the plugin:
 
 ```
-claude plugin marketplace add softcery/claude-code-voice-chat && claude plugin install voice-relay@voice-relay
+claude plugin marketplace add softcery/claude-code-voice-relay && claude plugin install voice-relay@softcery
 ```
 
-1. Run `/voiceagent` in Claude Code. The first run installs the voice server in about half a minute. The status line of Claude Code shows `voice-relay: connected as <folder>` when it is up.
+1. Run `/voice-relay` in Claude Code. The first run installs the voice server in about half a minute. The status line of Claude Code shows `voice-relay: connected as <folder>` when it is up.
 2. A small voice window opens: an app window in Chrome or Edge, else a tab of your default browser. When the browser asks for the microphone, allow it.
 3. The window shows the three parts of the agent. Paste two keys: [ElevenLabs](https://elevenlabs.io/app/settings/api-keys) for speech and [OpenRouter](https://openrouter.ai/keys) for the agent model. Or pick **This computer** for engines that need no key; the window names the download size and asks first.
 4. Press **Test and start**. Each part gets real input and shows what it heard and how fast it answered.
 5. The agent says it is ready. Give your first task: "Tell Claude Code to list the files in this project."
 
-Next times, `/voiceagent` opens the window, and it connects by itself.
+Next times, `/voice-relay` opens the window, and it connects by itself.
 
 ### Tips for hands-free work
 
@@ -101,17 +101,17 @@ Next times, `/voiceagent` opens the window, and it connects by itself.
 ## Usage
 
 ```
-/voiceagent           link this session, start the voice server, open the voice window
-/voiceagent settings  open all settings: providers, voices, prompt
-/voiceagent off       unlink this session
-/voiceagent quit      stop the voice server for all sessions
+/voice-relay           link this session, start the voice server, open the voice window
+/voice-relay settings  open all settings: providers, voices, prompt
+/voice-relay off       unlink this session
+/voice-relay quit      stop the voice server for all sessions
 ```
 
 Next times, the voice window connects by itself and shows the linked sessions, what each one does, and the conversation. Tap the microphone to mute. The gear opens the three parts again. If the window does not open by itself, open http://127.0.0.1:7860/voice.
 
 ### Several sessions
 
-Run `/voiceagent` in each session you want to talk to. Each session links under its folder name, for example `shop` and `api`. Name the session when you speak: "in api, run the tests". With one session linked, no name is needed. If the agent cannot tell which session you mean, it asks.
+Run `/voice-relay` in each session you want to talk to. Each session links under its folder name, for example `shop` and `api`. Name the session when you speak: "in api, run the tests". With one session linked, no name is needed. If the agent cannot tell which session you mean, it asks.
 
 Say "open a new session in api" and the agent opens a terminal window with Claude Code in that folder. It asks first only when the folder is unclear. The new session links by itself, and a task you gave goes to it. Say "pull up the research session" to continue the last conversation in that folder instead.
 
@@ -119,7 +119,7 @@ Say "open a new session in api" and the agent opens a terminal window with Claud
 - The terminal is Terminal (or your handler for `.command` files) on macOS, a console window on Windows, and `x-terminal-emulator`, GNOME Terminal, Konsole or xterm on Linux.
 - On macOS and Linux, set `VOICE_RELAY_TERMINAL` to use another terminal: a command that runs its last argument with `sh -c`, for example `kitty` or `wezterm start --`.
 
-The voice server runs on its own, so closing the session that started it does not stop it. It stops after 10 minutes with no linked session and no voice window, or on `/voiceagent quit`.
+The voice server runs on its own, so closing the session that started it does not stop it. It stops after 10 minutes with no linked session and no voice window, or on `/voice-relay quit`.
 
 ### Tray
 
@@ -130,21 +130,21 @@ The server shows an icon in the system tray (the macOS menu bar). Its colour giv
 | Symptom | What to do |
 | --- | --- |
 | No window opens | Open http://127.0.0.1:7860/voice. If it does not load, read `~/.config/voice-relay/start.log`. |
-| `/voiceagent` reports that `uv` is missing | Install uv, then restart Claude Code so it finds uv on the `PATH`. |
+| `/voice-relay` reports that `uv` is missing | Install uv, then restart Claude Code so it finds uv on the `PATH`. |
 | The agent interrupts itself or answers its own words | Wear headphones. |
-| "No Claude Code session is listening" | Run `/voiceagent` in that session. The status line shows `connected as <folder>`. |
+| "No Claude Code session is listening" | Run `/voice-relay` in that session. The status line shows `connected as <folder>`. |
 | A new session opened by voice does not link | Confirm the folder trust question in its terminal. |
 | Claude Code stops and the agent says it waits for you | A permission prompt waits at the screen. Answer it there, or use accept-edits mode. |
 | The agent mishears names | Pick an API for speech recognition; local engines know fewer names. Rename a folder to a word that is easy to say. |
 | Answers are slow | **Test and start** shows the time of each part. The slowest part is the one to change. |
-| Silence after `/reload-plugins` | Run `/voiceagent` again. |
+| Silence after `/reload-plugins` | Run `/voice-relay` again. |
 | Something else | Read `server.log` in `~/.config/voice-relay/`, and open an issue with its last lines. |
 
 ### Uninstall
 
-1. Run `/voiceagent quit` to stop the voice server.
+1. Run `/voice-relay quit` to stop the voice server.
 2. On the settings page, under **On this computer**, remove the local engines you installed. This deletes their models and packages.
-3. Run `claude plugin uninstall voice-relay@voice-relay`, then `claude plugin marketplace remove voice-relay`.
+3. Run `claude plugin uninstall voice-relay@softcery`, then `claude plugin marketplace remove softcery`.
 4. Delete `~/.config/voice-relay/`: your settings, keys, rules and logs.
 
 ## Where each part runs
@@ -270,7 +270,7 @@ voice window ── WebRTC ── voice server (pipecat) ───┤
 
 - The plugin contains a Claude Code [mod](https://code.claude.com/docs/en/plugins/mods/overview) and a [pipecat](https://github.com/pipecat-ai/pipecat) voice server.
 - The voice LLM has three tools: `send_task`, `abort` with optional new instructions, and `open_session`. The mod in each linked session long-polls the server and submits each task to Claude Code as your prompt.
-- `/voiceagent` runs `voice-relay start`, which starts the server as a detached process and exits once it answers.
+- `/voice-relay` runs `voice-relay start`, which starts the server as a detached process and exits once it answers.
 - The mod reports each tool-calling step and each final answer back. Progress is spoken at most every 30 s (`VOICE_RELAY_NARRATION_SECONDS`), only in a pause, and never over you.
 - On connect, each mod sends the newest part of its visible session history, about 6k tokens, so the agent has context.
 - Context is append-only, so LLM servers can reuse their prompt cache. Claude models on OpenRouter get explicit cache points.
@@ -313,7 +313,7 @@ Keys stay in `~/.config/voice-relay/.env` and go only to their own provider.
 - The agent cannot answer permission prompts. Use accept-edits mode or allow rules for hands-free work.
 - The voice agent is an LLM: now and then it asks an extra question or words a reply oddly. Hard-to-undo steps get a read-back first.
 - Mods are an early-access Claude Code API and can change.
-- Run `/voiceagent` again after `/reload-plugins`.
+- Run `/voice-relay` again after `/reload-plugins`.
 
 ## Development
 

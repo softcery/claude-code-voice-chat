@@ -2,7 +2,7 @@
 
 ## Report a vulnerability
 
-Do not open a public issue for a security problem. Report it privately: on the [Security tab](https://github.com/softcery/claude-code-voice-chat/security), press **Report a vulnerability**. Add the steps to reproduce it and the effect.
+Do not open a public issue for a security problem. Report it privately: on the [Security tab](https://github.com/softcery/claude-code-voice-relay/security), press **Report a vulnerability**. Add the steps to reproduce it and the effect.
 
 We answer within 5 working days.
 

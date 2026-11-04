@@ -4,4 +4,4 @@ This project follows the [Contributor Covenant, version 2.1](https://www.contrib
 
 In short: be respectful, assume good intent, and keep criticism about the work, not the person. Harassment of any kind is not accepted.
 
-Report unacceptable behaviour privately through the [Security tab](https://github.com/softcery/claude-code-voice-chat/security) with **Report a vulnerability**, or to a maintainer. Reports stay confidential.
+Report unacceptable behaviour privately through the [Security tab](https://github.com/softcery/claude-code-voice-relay/security) with **Report a vulnerability**, or to a maintainer. Reports stay confidential.

@@ -50,10 +50,10 @@ function setup(on: any, replies: Reply[], env: Record<string, string> = {}) {
 }
 
 function command(args: string) {
-  return { command: 'voiceagent', args, origin: { kind: 'composer' as const }, presentation: { isFullscreen: false, columns: 80 } }
+  return { command: 'voice-relay', args, origin: { kind: 'composer' as const }, presentation: { isFullscreen: false, columns: 80 } }
 }
 
-test('/voiceagent starts the server, links the session by folder and submits a voice task', { options: { port: 7999 } }, async ($, on) => {
+test('/voice-relay starts the server, links the session by folder and submits a voice task', { options: { port: 7999 } }, async ($, on) => {
   const clock = mock.clock(on)
   const task = { status: 200, text: JSON.stringify({ kind: 'task', text: 'The operator says: "run the lint"' }) }
   const run = setup(on, [task])
@@ -73,7 +73,7 @@ test('/voiceagent starts the server, links the session by folder and submits a v
   await clock.settle()
 })
 
-test('/voiceagent links again after the server forgot the session', { options: { port: 7999 } }, async ($, on) => {
+test('/voice-relay links again after the server forgot the session', { options: { port: 7999 } }, async ($, on) => {
   const clock = mock.clock(on)
   const run = setup(on, [{ status: 409, text: '' }])
   await $.session.start({ surface: 'terminal', isInteractive: true, cwd: '/work/shop' })
@@ -85,7 +85,7 @@ test('/voiceagent links again after the server forgot the session', { options: {
   await clock.settle()
 })
 
-test('after /clear the link ends, and /voiceagent links the new session id', { options: { port: 7999 } }, async ($, on) => {
+test('after /clear the link ends, and /voice-relay links the new session id', { options: { port: 7999 } }, async ($, on) => {
   const clock = mock.clock(on)
   const run = setup(on, [])
   await $.session.start({ surface: 'terminal', isInteractive: true, cwd: '/work/shop' })

@@ -118,7 +118,7 @@ class Sessions:
         live = self.live()
         names = ", ".join(session.name for session in live)
         if not live:
-            return "no Claude Code session polls the bridge. Tell the operator to run /voiceagent."
+            return "no Claude Code session polls the bridge. Tell the operator to run /voice-relay."
         if not name.strip():
             if len(live) == 1:
                 return live[0]

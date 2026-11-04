@@ -73,7 +73,7 @@ CATALOG = {  # provider: name, where it runs (api, local or server), what to kno
              "llm": ("Your server", "server", "OpenAI chat API: vLLM, SGLang, llama.cpp."),
              "tts": ("Your server", "server", "OpenAI speech API, for example Kokoro-FastAPI.")},
 }  # fmt: skip
-GUIDE = "https://github.com/softcery/claude-code-voice-chat#llm-apps-on-this-computer"
+GUIDE = "https://github.com/softcery/claude-code-voice-relay#llm-apps-on-this-computer"
 ABOUT = {  # the detail behind the info icon: what the operator installs and runs
     "ollama": "Install Ollama and pull a model that calls tools, for example with ollama pull. "
     "Keep Ollama running. voice-relay talks to it on port 11434.",

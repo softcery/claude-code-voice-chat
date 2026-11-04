@@ -4,13 +4,13 @@ Bug reports, ideas and pull requests are welcome.
 
 ## Report a bug or ask for a feature
 
-Open an [issue](https://github.com/softcery/claude-code-voice-chat/issues/new/choose) and pick the form. For a bug, add your system, the Claude Code version and the last lines of `~/.config/voice-relay/server.log`. Remove keys and private paths from the log first.
+Open an [issue](https://github.com/softcery/claude-code-voice-relay/issues/new/choose) and pick the form. For a bug, add your system, the Claude Code version and the last lines of `~/.config/voice-relay/server.log`. Remove keys and private paths from the log first.
 
 ## Set up
 
 1. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and Claude Code 2.1.303 or later.
 2. Clone the repository and run `uv sync`.
-3. Run `claude --plugin-dir .` to load the mod from your checkout, then `/voiceagent`.
+3. Run `claude --plugin-dir .` to load the mod from your checkout, then `/voice-relay`.
 
 ## Before a pull request
 
