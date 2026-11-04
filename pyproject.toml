@@ -30,6 +30,8 @@ override-dependencies = [
     "numba; sys_platform == 'never'",
     "resampy; sys_platform == 'never'",
     "sympy; sys_platform == 'never'",
+    # pipecat 1.13 caps Pillow below 13, which has the security fixes; we use it only for the tray icon
+    "pillow>=13,<14",
 ]
 
 [project.scripts]
