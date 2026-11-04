@@ -1,5 +1,5 @@
 {
-  "name": "voice-relay",
+  "name": "softcery",
   "owner": {
     "name": "Softcery"
   },
@@ -10,5 +10,5 @@
       "description": "Talk to Claude Code by voice."
     }
   ],
-  "description": "Voice relay to Claude Code."
+  "description": "Claude Code plugins by Softcery."
 }

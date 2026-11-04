@@ -19,7 +19,7 @@ type Link = {
   on: boolean
   polling: boolean
   base: string
-  attempt: number // a newer /voiceagent or off ends an older connect
+  attempt: number // a newer /voice-relay or off ends an older connect
   name?: string
   headers?: Record<string, string>
   running?: string
@@ -32,15 +32,15 @@ export const register: Register = (on, options) => {
   on('session.start', async ($, e, next) => {
     const started = await next(e)
     await $.command.register({
-      name: 'voiceagent',
-      description: 'Talk to this session by voice. /voiceagent settings, off, quit.',
+      name: 'voice-relay',
+      description: 'Talk to this session by voice. /voice-relay settings, off, quit.',
       argumentHint: '[settings|off|quit]',
     })
     if ((await $.env.get('VOICE_RELAY_LINK')) === '1') void connect($, link, options)
     return started
   })
 
-  on('command.run', { command: 'voiceagent' }, async ($, e) => {
+  on('command.run', { command: 'voice-relay' }, async ($, e) => {
     const args = e.args.trim()
     if (args === 'off' || args === 'quit') {
       link.attempt += 1
@@ -55,7 +55,7 @@ export const register: Register = (on, options) => {
     }
     void connect($, link, options)
     return { text: `Voice link starting. The voice window opens at ${link.base}/voice.` }
-  }).catch(() => ({ text: 'The voice link did not start. Run /voiceagent again.' }))
+  }).catch(() => ({ text: 'The voice link did not start. Run /voice-relay again.' }))
 
   on('session.end', async ($, e, next) => {
     if (link.on) await call($, link, '/claude/unlink', {})
@@ -173,7 +173,7 @@ async function poll($: EngineInterface, link: Link) {
         await run($, JSON.parse(text) as Command, link).catch(error => $.ui.log(`A voice command failed: ${String(error)}`))
       }
     } else {
-      $.ui.status(`the voice server answers ${status || 'nothing'}. Run /voiceagent to start it.`)
+      $.ui.status(`the voice server answers ${status || 'nothing'}. Run /voice-relay to start it.`)
       await pause($, RETRY_MS)
     }
   }

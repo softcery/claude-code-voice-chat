@@ -552,7 +552,7 @@ function say(who, text) {
 
 function renderSessions(sessions) {
   if (!sessions.length) {
-    $("sessions").replaceChildren(el("li", { class: "empty", text: "No session linked. Run /voiceagent in Claude Code." }));
+    $("sessions").replaceChildren(el("li", { class: "empty", text: "No session linked. Run /voice-relay in Claude Code." }));
     return;
   }
   $("sessions").replaceChildren(...sessions.map(session => {
