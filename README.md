@@ -43,7 +43,7 @@ voice-relay is a voice agent that sits next to Claude Code. It hears you, sends 
 
 Two real Claude Code sessions, driven by voice in one take: resume a research session, open a new project, ask one while the other builds, stop and redirect, hear the result, approve the commit.
 
-https://github.com/user-attachments/assets/49d3535c-d5f0-4ea5-a3b9-139562336463
+https://github.com/user-attachments/assets/41eb6f14-9fd1-4697-80c8-9b30177bc1c0
 
 ## Quick start
 
